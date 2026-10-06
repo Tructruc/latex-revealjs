@@ -28,6 +28,13 @@ describe("HTML renderer reveal features", () => {
     expect(html).toContain('class="rt-overlay fragment"');
   });
 
+  it("wraps layout slides and renders slots in HTML", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}[layout=HeroSplit]{X}\slot{left}{L}\slot{right}{R}\end{frame}\end{document}`);
+    expect(html).toContain('class="rt-layout rt-layout-HeroSplit"');
+    expect(html).toContain('class="rt-slot" data-slot="left"');
+    expect(html).toContain('class="rt-slot" data-slot="right"');
+  });
+
   it("renders markdown to html", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{M}\begin{markdown}
 # Hello
