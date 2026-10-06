@@ -15,7 +15,7 @@ const REVEAL_UTILITY_CONTAINERS: Record<string, string> = { fittext: "fit-text",
 const BLOCK_ENVIRONMENTS = new Set(["block", "alertblock", "exampleblock", "theorem", "lemma", "corollary", "proposition", "definition", "example", "proof", "remark"]);
 const ALIGN_ENVIRONMENTS: Record<string, string> = { center: "align-center", flushleft: "align-left", flushright: "align-right", quote: "quote", quotation: "quote" };
 const OVERLAY_COMMANDS = new Set(["only", "uncover", "visible", "onslide", "alt", "temporal"]);
-const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "textcolor", "colorbox", "footnote", "includegraphics", "framesubtitle", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
+const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "hyperlink", "textcolor", "colorbox", "footnote", "includegraphics", "framesubtitle", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
 
 export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceFiles: string[] = [ast.location.file]): SemanticResult {
   const diagnostics: import("./diagnostics.js").Diagnostic[] = [];
@@ -94,6 +94,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       case "textcolor": return [{ type: "format", style: "textcolor", options: { color: arg() }, children: children(1), source: node.location }];
       case "colorbox": return [{ type: "format", style: "colorbox", options: { color: arg() }, children: children(1), source: node.location }];
       case "href": return [{ type: "link", href: arg(), children: children(1), source: node.location }];
+      case "hyperlink": return [{ type: "link", href: `#/${arg()}`, children: children(1), source: node.location }];
       case "url": return [{ type: "link", href: arg(), children: [{ type: "text", value: arg(), source: node.location }], source: node.location }];
       case "component": return [makeComponent(arg(), optionsFromSecond(node), flow(children(1)), node.location)];
       case "pause": return [{ type: "fragment", effect: PAUSE_BOUNDARY, children: [], source: node.location }];
