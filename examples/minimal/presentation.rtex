@@ -1,0 +1,20 @@
+\documentclass{reveal}
+\title{Minimal Deck}
+\subtitle{A starting point}
+\author{RevealTeX}
+\date{\today}
+\theme{moon}
+\begin{document}
+\maketitle
+\begin{frame}{Hello}
+Welcome to RevealTeX. Author in a concise LaTeX-like language and present
+with reveal.js.
+\begin{itemize}
+\item<1-> Structured like a document
+\item<2-> Animated like the web
+\end{itemize}
+\end{frame}
+\begin{frame}{Math}
+\[ E = mc^2 \]
+\end{frame}
+\end{document}

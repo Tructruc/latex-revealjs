@@ -5,7 +5,8 @@ import { parseOptions, parseValue } from "./options.js";
 import { revealAttributes } from "./attributes.js";
 
 export interface SemanticResult { presentation: PresentationIR; diagnostics: import("./diagnostics.js").Diagnostic[] }
-const FORMATS = new Set(["textbf", "textit", "emph", "underline", "alert", "small", "large", "Huge"]);
+const FORMATS = new Set(["textbf", "textit", "emph", "underline", "alert", "small", "large", "Huge", "em", "texttt", "textsf", "textsc", "textrm", "textnormal"]);
+const FORMAT_ALIASES: Record<string, string> = { em: "emph" };
 const PAUSE_BOUNDARY = "__revealtex_pause_boundary__";
 const MATH_ENVIRONMENTS = new Set(["equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "split", "aligned", "gathered", "displaymath", "math", "eqnarray", "eqnarray*"]);
 const MATH_INNER_ENVIRONMENTS = new Set(["equation", "equation*", "displaymath", "math"]);
@@ -14,7 +15,7 @@ const REVEAL_UTILITY_CONTAINERS: Record<string, string> = { fittext: "fit-text",
 const BLOCK_ENVIRONMENTS = new Set(["block", "alertblock", "exampleblock", "theorem", "lemma", "corollary", "proposition", "definition", "example", "proof", "remark"]);
 const ALIGN_ENVIRONMENTS: Record<string, string> = { center: "align-center", flushleft: "align-left", flushright: "align-right", quote: "quote", quotation: "quote" };
 const OVERLAY_COMMANDS = new Set(["only", "uncover", "visible", "onslide", "alt", "temporal"]);
-const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "textcolor", "colorbox", "footnote", "framesubtitle", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
+const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "textcolor", "colorbox", "footnote", "includegraphics", "framesubtitle", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
 
 export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceFiles: string[] = [ast.location.file]): SemanticResult {
   const diagnostics: import("./diagnostics.js").Diagnostic[] = [];
@@ -55,7 +56,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     const arg = (i = 0) => node.requiredArguments[i]?.raw.trim() ?? "";
     const children = (i = 0) => compile(node.requiredArguments[i]?.children ?? []);
     const options = parseOptions(node.optionalArguments[0]?.raw);
-    if (FORMATS.has(node.name)) return [{ type: "format", style: node.name, children: children(), source: node.location }];
+    if (FORMATS.has(node.name)) return [{ type: "format", style: FORMAT_ALIASES[node.name] ?? node.name, children: children(), source: node.location }];
     switch (node.name) {
       case "fragment": {
         const shorthand = node.optionalArguments[0]?.raw.trim();
@@ -81,6 +82,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       }
       case "animate": return [{ type: "animation", effect: String(options.effect ?? "fade-in"), duration: stringOption(options.duration), delay: stringOption(options.delay), easing: stringOption(options.easing), children: flow(children()), source: node.location }];
       case "image": case "video": case "svg": assets.push({ kind: node.name, path: arg(), source: node.location }); return [{ type: node.name, src: arg(), options, source: node.location }];
+      case "includegraphics": assets.push({ kind: "image", path: arg(), source: node.location }); return [{ type: "image", src: arg(), options, source: node.location }];
       case "note": return [{ type: "notes", children: flow(children()), source: node.location }];
       case "slot": return [{ type: "slot", name: arg(), children: flow(children(1)), source: node.location }];
       case "id": case "element": return [{ type: "element", id: node.name === "id" ? arg() : stringOption(options.id), options, children: node.name === "id" ? children(1) : children(), source: node.location }];
