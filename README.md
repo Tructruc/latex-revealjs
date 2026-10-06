@@ -53,7 +53,7 @@ Presentation-level math macros are passed to the local KaTeX runtime:
 \end{frame}
 ```
 
-Includes resolve relative to their owner and reject cycles:
+Includes resolve relative to their owner and reject cycles. `\input`, `\include`, and `\subimport` are supported:
 
 ```latex
 \input{slides/results.rtex}
@@ -88,7 +88,16 @@ Beamer-style overlays map onto reveal fragments. `\only` removes hidden content 
 \temporal<3>{Before}{At}{After}
 ```
 
-Display math accepts `$$...$$`, `\[...\]`, and the `equation`, `align`, `gather`, `multline`, `split`, `aligned`, `gathered`, and `cases` environments, all rendered locally with KaTeX. `\today` expands to the current date inside `\date{...}`.
+Overlays also accept Beamer relative forms resolved with a per-frame cursor: `<+>`, `<+->`, and `<+-k>`.
+
+```latex
+\begin{itemize}
+  \item<+-> First
+  \item<+-> Second
+\end{itemize}
+```
+
+Display math accepts `$$...$$`, `\[...\]`, and the `equation`, `align`, `gather`, `multline`, `split`, `aligned`, `gathered`, and `cases` environments, all rendered locally with KaTeX. `\today` expands to the current date inside `\date{...}`. `\begin{markdown}...\end{markdown}` renders GitHub-flavoured Markdown at build time.
 
 Reveal layout utilities are first-class containers: `\fittext{}`, `\stack{}`, `\hstack{}`, `\vstack{}`, `\stretch{}`, and `\frame{}`.
 
