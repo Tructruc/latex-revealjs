@@ -11,5 +11,5 @@
 .fragment.glow.visible { filter:drop-shadow(0 0 1rem var(--rt-accent)); }
 .fragment.underline-reveal { text-decoration-color:transparent; text-decoration-line:underline; text-decoration-thickness:.12em; text-underline-offset:.16em; } .fragment.underline-reveal.visible { text-decoration-color:var(--rt-accent); }
 .reveal .fragment { transition-property:transform,opacity,filter,text-decoration-color; transition-duration:var(--rt-duration,var(--rt-animation-normal)); transition-delay:var(--rt-delay,0ms); transition-timing-function:var(--rt-easing,cubic-bezier(.22,1,.36,1)); }
-[data-rt-overlay-start].rt-overlay-hidden,[data-rt-overlay-end].rt-overlay-hidden{display:none!important;}
+[data-rt-overlay-start].rt-overlay-hidden,[data-rt-overlay-end].rt-overlay-hidden,[data-rt-overlay-windows].rt-overlay-hidden{display:none!important;}
 @media (prefers-reduced-motion:reduce) { .reveal .fragment { transition-duration:1ms!important; animation-duration:1ms!important; } }

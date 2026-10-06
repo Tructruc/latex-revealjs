@@ -24,10 +24,30 @@ export function overlayShouldHide(overlay: number, start: number, end: number, o
   return false;
 }
 
+export interface OverlayWindow { start: number; end?: number }
+
+export function parseOverlayWindowsAttr(value: string): OverlayWindow[] {
+  return value.split(",").map(token => {
+    const [rawStart, rawEnd] = token.split(":");
+    return { start: Number(rawStart), end: rawEnd ? Number(rawEnd) : undefined };
+  }).filter(window => Number.isFinite(window.start));
+}
+
+export function overlayInWindows(overlay: number, windows: OverlayWindow[]): boolean {
+  return windows.some(window => overlay >= window.start && overlay <= (window.end ?? Infinity));
+}
+
 export function applyOverlayVisibility(root: ParentNode | null | undefined, overlay: number, shouldHide: typeof overlayShouldHide = overlayShouldHide): void {
-  root?.querySelectorAll<HTMLElement>("[data-rt-overlay-start],[data-rt-overlay-end]").forEach(element => {
-    const start = Number(element.dataset.rtOverlayStart ?? "1");
-    const end = element.dataset.rtOverlayEnd !== undefined ? Number(element.dataset.rtOverlayEnd) : Infinity;
-    element.classList.toggle("rt-overlay-hidden", shouldHide(overlay, start, end, element.classList.contains("rt-only")));
+  root?.querySelectorAll<HTMLElement>("[data-rt-overlay-start],[data-rt-overlay-end],[data-rt-overlay-windows]").forEach(element => {
+    const windowsAttr = element.dataset.rtOverlayWindows;
+    let hidden: boolean;
+    if (windowsAttr) {
+      hidden = !overlayInWindows(overlay, parseOverlayWindowsAttr(windowsAttr));
+    } else {
+      const start = Number(element.dataset.rtOverlayStart ?? "1");
+      const end = element.dataset.rtOverlayEnd !== undefined ? Number(element.dataset.rtOverlayEnd) : Infinity;
+      hidden = shouldHide(overlay, start, end, element.classList.contains("rt-only"));
+    }
+    element.classList.toggle("rt-overlay-hidden", hidden);
   });
 }

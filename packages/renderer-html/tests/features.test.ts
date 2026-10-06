@@ -35,6 +35,12 @@ describe("HTML renderer reveal features", () => {
     expect(html).toContain('class="rt-slot" data-slot="right"');
   });
 
+  it("emits non-contiguous overlay windows", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{W}\only<2,4>{X}\end{frame}\end{document}`);
+    expect(html).toContain('data-rt-overlay-windows="2:2,4:4"');
+    expect(html).toContain("rt-overlay-hidden");
+  });
+
   it("renders footnotes", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{F}Text\footnote{Note text}\end{frame}\end{document}`);
     expect(html).toContain('class="rt-footnote-ref"');

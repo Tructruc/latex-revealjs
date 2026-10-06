@@ -17,14 +17,13 @@ const ready = ref(false);
 const currentSlide = ref<HTMLElement | null>(null);
 const currentOverlay = ref(1);
 const fragmentState = ref({ shown: [] as Element[], hidden: [] as Element[] });
-let overlayFrame = 0;
+let overlayScheduled = false;
 const scheduleOverlaySync = () => {
-  if (overlayFrame) return;
-  const schedule: (callback: () => void) => void = typeof requestAnimationFrame === "function" ? requestAnimationFrame : (callback) => void setTimeout(callback, 0);
-  overlayFrame = (schedule(syncOverlays) as unknown as number) || 1;
+  if (overlayScheduled) return;
+  overlayScheduled = true;
+  setTimeout(() => { overlayScheduled = false; syncOverlays(); }, 0);
 };
 const syncOverlays = () => {
-  overlayFrame = 0;
   const slide = deck.value?.getCurrentSlide?.() as HTMLElement | undefined;
   if (!slide) return;
   const overlay = currentOverlayNumber(slide);

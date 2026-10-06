@@ -1,6 +1,6 @@
 import type { AstNode, CommandNode, DocumentNode, EnvironmentNode, SourceLocation } from "./ast.js";
 import type { ComponentDefinition, PluginCommandContext, PluginCommandDefinition, RevealTeXConfig } from "./config.js";
-import type { AssetReference, ColumnIR, ComponentIR, ListItemIR, PresentationIR, PresentationNode, PropertyValue, SlideBackground, SlideIR, SlideStackIR } from "./ir.js";
+import type { AssetReference, ColumnIR, ComponentIR, ListItemIR, OverlayWindow, PresentationIR, PresentationNode, PropertyValue, SlideBackground, SlideIR, SlideStackIR } from "./ir.js";
 import { parseOptions, parseValue } from "./options.js";
 import { revealAttributes } from "./attributes.js";
 
@@ -30,9 +30,9 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
   let tocRequested = false;
   let overlayCursor = 1;
   let footnotes: PresentationNode[][] = [];
-  const resolveOverlay = (raw?: string): { start: number; end?: number } | undefined => {
+  const resolveOverlay = (raw?: string): { start: number; end?: number; windows?: OverlayWindow[] } | undefined => {
     const parsed = parseOverlay(raw);
-    if (parsed) return parsed;
+    if (parsed) return { ...parsed, windows: parseOverlayWindows(raw) };
     if (!raw) return undefined;
     const body = raw.trim().replace(/>$/, "");
     if (body === "+") return { start: ++overlayCursor, end: overlayCursor };
@@ -64,7 +64,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
         const overlay = resolveOverlay(node.overlay);
         const explicitIndex = numberOption(options.index);
         const index = explicitIndex ?? (overlay && overlay.start > 1 ? overlay.start - 1 : undefined);
-        return [{ type: "fragment", effect, index, start: overlay?.start, end: overlay?.end, children: flow(children()), source: node.location }];
+        return [{ type: "fragment", effect, index, start: overlay?.start, end: overlay?.end, windows: overlay?.windows, children: flow(children()), source: node.location }];
       }
       case "only": case "uncover": case "visible": case "onslide": return overlayContent(node.name === "only", resolveOverlay(node.overlay), flow(children()), node.location);
       case "alt": {
@@ -137,7 +137,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
           let index = overlay && overlay.start > 1 ? overlay.start - 1 : undefined;
           let start = overlay?.start;
           if (!overlay && incremental) { incrementalIndex++; index = incrementalIndex; start = incrementalIndex + 1; }
-          items.push({ type: "list-item", index, start, end: overlay?.end, children: flow(compile(current)), source: itemCommand.location });
+          items.push({ type: "list-item", index, start, end: overlay?.end, windows: overlay?.windows, children: flow(compile(current)), source: itemCommand.location });
         }
         current = [];
       };
@@ -229,6 +229,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     footnotes = [];
     const body = compile(contentAst); const notes = body.filter(n => n.type === "notes").flatMap(n => n.children); const children = flow(body.filter(n => n.type !== "notes"));
     if (footnotes.length) children.push({ type: "container", kind: "footnotes", options: {}, children: footnotes.map((nodes, index) => ({ type: "paragraph", children: [{ type: "format", style: "footnote-marker", children: [{ type: "text", value: `${index + 1}`, source: node.location }], source: node.location }, ...nodes.flatMap(inner => inner.type === "paragraph" ? inner.children : [inner])], source: node.location })), source: node.location });
+    padOverlaySteps(children, node.location);
     const explicitId = stringOption(options.id) ?? stringOption(options.label);
     const attributes = revealAttributes(options);
     if (options.noframenumbering === true) attributes["data-visibility"] = "uncounted";
@@ -313,13 +314,29 @@ function optionsFromSecond(node: CommandNode): Record<string, PropertyValue> { r
 function optionsWithout(options: Record<string, PropertyValue>, key: string): Record<string, PropertyValue> { const copy = { ...options }; delete copy[key]; return copy; }
 function stringOption(value: PropertyValue | undefined): string | undefined { return typeof value === "string" || typeof value === "number" ? String(value) : undefined; }
 function numberOption(value: PropertyValue | undefined): number | undefined { return typeof value === "number" ? value : typeof value === "string" && /^\d+$/.test(value) ? Number(value) : undefined; }
+function padOverlaySteps(nodes: PresentationNode[], source: SourceLocation): void {
+  const indices = new Set<number>(); let maxOverlay = 0;
+  const register = (index?: number, start?: number, end?: number, windows?: OverlayWindow[]) => {
+    if (index !== undefined) { indices.add(index); maxOverlay = Math.max(maxOverlay, index + 1); }
+    if (windows) for (const window of windows) maxOverlay = Math.max(maxOverlay, window.start, window.end ?? window.start);
+    if (start !== undefined) maxOverlay = Math.max(maxOverlay, start, end ?? start);
+  };
+  const visit = (list: PresentationNode[]) => {
+    for (const node of list) {
+      if (node.type === "fragment") { register(node.index, node.start, node.end, node.windows); visit(node.children); }
+      else if (node.type === "list") for (const item of node.items) { register(item.index, item.start, item.end, item.windows); visit(item.children); }
+      else if (node.type === "columns") node.columns.forEach(column => visit(column.children));
+      else if ("children" in node) visit(node.children);
+    }
+  };
+  visit(nodes);
+  for (let index = 1; index < maxOverlay; index++) if (!indices.has(index)) nodes.push({ type: "fragment", index, children: [], source });
+}
 function rawCode(raw: string): string { return raw.replace(/^\n/, "").replace(/\n[ \t]*$/, ""); }
 function parseTable(raw: string): string[][] {
   return raw.split(/\\\\/).map(line => line.trim()).filter(line => line.length > 0).map(line => line.split("&").map(cell => cell.trim()));
 }
-function parseOverlay(spec?: string): { start: number; end?: number } | undefined {
-  if (!spec) return undefined;
-  const token = spec.split(",")[0]!.trim();
+function parseOverlayToken(token: string): { start: number; end?: number } | undefined {
   const range = token.match(/^(\d+)\s*-\s*(\d+)$/);
   if (range) return { start: Number(range[1]), end: Number(range[2]) };
   const from = token.match(/^(\d+)\s*-\s*$/);
@@ -330,9 +347,18 @@ function parseOverlay(spec?: string): { start: number; end?: number } | undefine
   if (single) return { start: Number(single[1]), end: Number(single[1]) };
   return undefined;
 }
-function overlayContent(only: boolean, range: { start: number; end?: number } | undefined, children: PresentationNode[], source: SourceLocation): PresentationNode[] {
-  if (!range || (range.start <= 1 && range.end === undefined)) return children;
-  return [{ type: "fragment", index: range.start > 1 ? range.start - 1 : undefined, start: range.start, end: range.end, only, children, source }];
+function parseOverlayWindows(spec?: string): OverlayWindow[] | undefined {
+  if (!spec || !spec.includes(",")) return undefined;
+  const windows = spec.split(",").map(token => parseOverlayToken(token.trim())).filter((range): range is OverlayWindow => Boolean(range));
+  return windows.length > 1 ? windows : undefined;
+}
+function parseOverlay(spec?: string): { start: number; end?: number } | undefined {
+  if (!spec) return undefined;
+  return parseOverlayToken(spec.split(",")[0]!.trim());
+}
+function overlayContent(only: boolean, range: { start: number; end?: number; windows?: OverlayWindow[] } | undefined, children: PresentationNode[], source: SourceLocation): PresentationNode[] {
+  if (!range || (range.start <= 1 && range.end === undefined && !range.windows)) return children;
+  return [{ type: "fragment", index: range.start > 1 ? range.start - 1 : undefined, start: range.start, end: range.end, windows: range.windows, only, children, source }];
 }
 function textContent(nodes: AstNode[]): string { return nodes.map(n => n.type === "text" ? n.value : "").join(""); }
 function stableSlideId(title: string, index: number): string { const slug = title.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "untitled"; return `slide-${slug}-${index}`; }

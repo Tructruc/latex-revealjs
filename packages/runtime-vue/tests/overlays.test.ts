@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { overlayShouldHide } from "../src/overlays.js";
+import { overlayInWindows, overlayShouldHide, parseOverlayWindowsAttr } from "../src/overlays.js";
 
 describe("overlay visibility", () => {
   it("hides `only` content outside its window", () => {
@@ -19,5 +19,14 @@ describe("overlay visibility", () => {
   it("never hides endless non-only content", () => {
     expect(overlayShouldHide(1, 2, Infinity, false)).toBe(false);
     expect(overlayShouldHide(99, 2, Infinity, false)).toBe(false);
+  });
+
+  it("parses and evaluates non-contiguous overlay windows", () => {
+    const windows = parseOverlayWindowsAttr("2:4,6:");
+    expect(windows).toEqual([{ start: 2, end: 4 }, { start: 6, end: undefined }]);
+    expect(overlayInWindows(2, windows)).toBe(true);
+    expect(overlayInWindows(4, windows)).toBe(true);
+    expect(overlayInWindows(5, windows)).toBe(false);
+    expect(overlayInWindows(7, windows)).toBe(true);
   });
 });

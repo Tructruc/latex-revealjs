@@ -90,7 +90,7 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
       return `<span class=${quote(`rt-${node.style}`)}>${renderNodes(node.children, state)}</span>`;
     }
     case "fragment": {
-      const managed = node.index !== undefined || (node.start === undefined && node.end === undefined);
+      const managed = node.index !== undefined || (node.start === undefined && node.end === undefined && node.windows === undefined);
       if (managed) return `<RevealFragment${node.effect ? ` effect=${quote(node.effect)}` : ""}${node.index !== undefined ? ` :index=${quoteBinding(node.index)}` : ""}${node.only ? ' class="rt-only"' : ""}${overlayDataAttrs(node)}>${renderNodes(node.children, state)}</RevealFragment>`;
       const classes = ["rt-overlay", node.effect, node.only && "rt-only"].filter(Boolean).join(" ");
       return `<div class=${quote(classes)}${overlayDataAttrs(node)}>${renderNodes(node.children, state)}</div>`;
@@ -131,11 +131,15 @@ function renderTable(node: Extract<PresentationNode, { type: "table" }>): string
   const tbody = `<tbody>${body.map(row => `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody>`;
   return `<table class="rt-table">${caption}${thead}${tbody}</table>`;
 }
-function overlayDataAttrs(node: { index?: number; start?: number; end?: number }): string {
+function overlayDataAttrs(node: { index?: number; start?: number; end?: number; windows?: { start: number; end?: number }[] }): string {
   const parts: string[] = [];
-  const start = node.start ?? (node.index !== undefined ? node.index + 1 : undefined);
-  if (start !== undefined) parts.push(`data-rt-overlay-start=${quote(String(start))}`);
-  if (node.end !== undefined) parts.push(`data-rt-overlay-end=${quote(String(node.end))}`);
+  if (node.windows?.length) {
+    parts.push(`data-rt-overlay-windows=${quote(node.windows.map(window => `${window.start}:${window.end ?? ""}`).join(","))}`);
+  } else {
+    const start = node.start ?? (node.index !== undefined ? node.index + 1 : undefined);
+    if (start !== undefined) parts.push(`data-rt-overlay-start=${quote(String(start))}`);
+    if (node.end !== undefined) parts.push(`data-rt-overlay-end=${quote(String(node.end))}`);
+  }
   return parts.length ? " " + parts.join(" ") : "";
 }
 function animationStyle(node: Extract<PresentationNode, { type: "animation" }>): string { const values = [node.duration && `--rt-duration:${node.duration}`, node.delay && `--rt-delay:${node.delay}`, node.easing && `--rt-easing:${node.easing}`].filter(Boolean); return values.length ? ` style=${quote(values.join(";"))}` : ""; }

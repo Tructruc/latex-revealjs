@@ -45,6 +45,11 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain('class="rt-bottom"');
   });
 
+  it("emits non-contiguous overlay windows", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{W}\only<2,4>{X}\end{frame}\end{document}`);
+    expect(vue).toContain('data-rt-overlay-windows="2:2,4:4"');
+  });
+
   it("renders footnotes", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{F}Text\footnote{Note text}\end{frame}\end{document}`);
     expect(vue).toContain('class="rt-footnote-ref"');

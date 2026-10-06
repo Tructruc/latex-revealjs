@@ -11,6 +11,7 @@ export interface TextIR extends BaseIR { type: "text"; value: string }
 export interface ParagraphIR extends BaseIR { type: "paragraph"; children: PresentationNode[] }
 export interface MathIR extends BaseIR { type: "math"; display: boolean; tex: string }
 export interface FormattingIR extends BaseIR { type: "format"; style: string; options?: Record<string, PropertyValue>; children: PresentationNode[] }
+export interface OverlayWindow { start: number; end?: number }
 export interface FragmentIR extends BaseIR {
   type: "fragment"; effect?: string;
   /** Reveal fragment index (1-based ordering). */
@@ -19,12 +20,14 @@ export interface FragmentIR extends BaseIR {
   start?: number;
   /** Last Beamer overlay this content is visible on (undefined = forever). */
   end?: number;
+  /** Non-contiguous visibility windows (e.g. `<2,4>`); overrides start/end. */
+  windows?: OverlayWindow[];
   /** When true the element is removed from layout while hidden (`\only`). */
   only?: boolean;
   children: PresentationNode[];
 }
 export interface AnimationIR extends BaseIR { type: "animation"; effect: string; duration?: string; delay?: string; easing?: string; children: PresentationNode[] }
-export interface ListItemIR extends BaseIR { type: "list-item"; index?: number; start?: number; end?: number; only?: boolean; children: PresentationNode[] }
+export interface ListItemIR extends BaseIR { type: "list-item"; index?: number; start?: number; end?: number; windows?: OverlayWindow[]; only?: boolean; children: PresentationNode[] }
 export interface ListIR extends BaseIR { type: "list"; ordered: boolean; items: ListItemIR[] }
 export interface ColumnIR extends BaseIR { type: "column"; width?: string; children: PresentationNode[] }
 export interface ColumnsIR extends BaseIR { type: "columns"; gap?: string; alignment?: string; columns: ColumnIR[] }

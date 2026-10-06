@@ -88,7 +88,7 @@ Beamer-style overlays map onto reveal fragments. `\only` removes hidden content 
 \temporal<3>{Before}{At}{After}
 ```
 
-Overlays also accept Beamer relative forms resolved with a per-frame cursor: `<+>`, `<+->`, and `<+-k>`.
+Overlays also accept Beamer relative forms resolved with a per-frame cursor (`<+>`, `<+->`, `<+-k>`) and non-contiguous windows such as `<2,4>`. Missing reveal steps referenced by window overlays are padded automatically so the sequence stays correct.
 
 ```latex
 \begin{itemize}
