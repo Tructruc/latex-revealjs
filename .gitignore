@@ -3,6 +3,8 @@ dist/
 *.tsbuildinfo
 .revealtex/
 generated/
+dist-vue/
+dist-html/
 .tmp-cli-debug/
 .opencode/
 coverage/

@@ -182,7 +182,32 @@ describe.sequential("RevealTeX CLI integration", () => {
     expect(recovered).not.toContain("<img");
     await expectMissing(replacementPath);
   }, 20_000);
+
+  it("scaffolds a standalone project with create", async () => {
+    const fixture = await createFixture("create");
+    await writeFile(fixture.source, deck("Standalone", "Hello from create."));
+
+    const result = await runCli(["create", fixture.source, "--output", fixture.output]);
+    expect(result.stdout).toContain("generated");
+
+    for (const file of ["index.html", "package.json", "src/main.ts", "src/style.css", "vite.config.ts"]) {
+      await expect(access(join(fixture.output, file))).resolves.toBeUndefined();
+    }
+    const vue = await readFile(join(fixture.output, "Presentation.generated.vue"), "utf8");
+    expect(vue).toContain("RevealDeck");
+  }, 20_000);
 });
+
+async function runCli(args: string[]): Promise<{ stdout: string; stderr: string }> {
+  return await new Promise((resolveRun, rejectRun) => {
+    const child = spawn(process.execPath, [cliEntry, ...args], { env: { ...process.env, NO_COLOR: "1" }, stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = ""; let stderr = "";
+    child.stdout?.on("data", chunk => { stdout += String(chunk); });
+    child.stderr?.on("data", chunk => { stderr += String(chunk); });
+    child.on("error", rejectRun);
+    child.on("exit", code => code === 0 ? resolveRun({ stdout, stderr }) : rejectRun(new Error(`CLI exited with ${code}.\nstdout:\n${stdout}\nstderr:\n${stderr}`)));
+  });
+}
 
 interface Fixture {
   root: string;
