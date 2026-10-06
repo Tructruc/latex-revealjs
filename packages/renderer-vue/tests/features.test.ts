@@ -39,6 +39,12 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain('class="rt-slide-stack" data-transition="convex" data-transition-speed="fast"');
   });
 
+  it("maps t/b frame options to vertical alignment classes", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}[t]{T}Top\end{frame}\begin{frame}[b]{B}Bottom\end{frame}\end{document}`);
+    expect(vue).toContain('class="rt-top"');
+    expect(vue).toContain('class="rt-bottom"');
+  });
+
   it("renders footnotes", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{F}Text\footnote{Note text}\end{frame}\end{document}`);
     expect(vue).toContain('class="rt-footnote-ref"');

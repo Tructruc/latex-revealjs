@@ -66,7 +66,7 @@ function renderSlide(slide: SlideIR, state: VueRenderState): string {
   if (slide.background?.videoMuted) attrs.push("data-background-video-muted");
   if (slide.background?.interactive) attrs.push("data-background-interactive");
   for (const [name, value] of Object.entries(slide.attributes)) attrs.push(value === "" ? name : `${name}=${quote(value)}`);
-  const classes = [typeof slide.options.class === "string" ? slide.options.class : undefined, slide.options.titleSlide === true ? "rt-title-slide" : undefined, slide.options.sectionDivider === true ? "rt-section-divider" : undefined].filter(Boolean).join(" ");
+  const classes = [typeof slide.options.class === "string" ? slide.options.class : undefined, slide.options.titleSlide === true ? "rt-title-slide" : undefined, slide.options.sectionDivider === true ? "rt-section-divider" : undefined, slide.options.t === true ? "rt-top" : undefined, slide.options.b === true ? "rt-bottom" : undefined].filter(Boolean).join(" ");
   if (classes) attrs.push(`class=${quote(classes)}`);
   if (typeof slide.options.style === "string") attrs.push(`style=${quote(slide.options.style)}`);
   const title = slide.title?.length ? `<h2>${renderNodes(slide.title, state)}</h2>` : "";
