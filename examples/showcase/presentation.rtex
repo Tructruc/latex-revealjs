@@ -76,7 +76,7 @@ The renderer adds framework-specific behavior only at the edge.
 \begin{section}[transition=convex,transition-speed=fast]{Behind the model}
 \begin{frame}{The forward pass}
 \[h = \sigma(Wx+b)\]
-Navigate down to inspect the training objective.
+Navigate down to inspect the training objective.\footnote{Reported on a held-out validation split.}
 \AssetPreview[source={assets/pipeline.svg},label={Imported through a typed component asset prop}]
 \LifecycleProbe[]
 \end{frame}

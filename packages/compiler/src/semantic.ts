@@ -14,7 +14,7 @@ const REVEAL_UTILITY_CONTAINERS: Record<string, string> = { fittext: "fit-text",
 const BLOCK_ENVIRONMENTS = new Set(["block", "alertblock", "exampleblock", "theorem", "lemma", "corollary", "proposition", "definition", "example", "proof", "remark"]);
 const ALIGN_ENVIRONMENTS: Record<string, string> = { center: "align-center", flushleft: "align-left", flushright: "align-right", quote: "quote", quotation: "quote" };
 const OVERLAY_COMMANDS = new Set(["only", "uncover", "visible", "onslide", "alt", "temporal"]);
-const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "textcolor", "colorbox", "framesubtitle", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
+const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "textcolor", "colorbox", "footnote", "framesubtitle", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
 
 export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceFiles: string[] = [ast.location.file]): SemanticResult {
   const diagnostics: import("./diagnostics.js").Diagnostic[] = [];
@@ -28,6 +28,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
   let slideNumber = 0;
   let tocRequested = false;
   let overlayCursor = 1;
+  let footnotes: PresentationNode[][] = [];
   const resolveOverlay = (raw?: string): { start: number; end?: number } | undefined => {
     const parsed = parseOverlay(raw);
     if (parsed) return parsed;
@@ -87,6 +88,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       case "card": case "badge": return [{ type: "container", kind: node.name, options, children: flow(children()), source: node.location }];
       case "callout": { const shorthand=node.optionalArguments[0]?.raw.trim();const normalized=shorthand&&!shorthand.includes("=")?{variant:shorthand}:options;return [{ type:"container",kind:"callout",options:normalized,children:flow(children()),source:node.location }]; }
       case "fittext": case "stack": case "hstack": case "vstack": case "stretch": case "frame": return [{ type: "container", kind: REVEAL_UTILITY_CONTAINERS[node.name]!, options, children: flow(children()), source: node.location }];
+      case "footnote": { const index = footnotes.length + 1; footnotes.push(flow(children())); return [{ type: "format", style: "footnote", children: [{ type: "text", value: String(index), source: node.location }], source: node.location }]; }
       case "textcolor": return [{ type: "format", style: "textcolor", options: { color: arg() }, children: children(1), source: node.location }];
       case "colorbox": return [{ type: "format", style: "colorbox", options: { color: arg() }, children: children(1), source: node.location }];
       case "href": return [{ type: "link", href: arg(), children: children(1), source: node.location }];
@@ -222,7 +224,9 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       return false;
     });
     overlayCursor = 1;
+    footnotes = [];
     const body = compile(contentAst); const notes = body.filter(n => n.type === "notes").flatMap(n => n.children); const children = flow(body.filter(n => n.type !== "notes"));
+    if (footnotes.length) children.push({ type: "container", kind: "footnotes", options: {}, children: footnotes.map((nodes, index) => ({ type: "paragraph", children: [{ type: "format", style: "footnote-marker", children: [{ type: "text", value: `${index + 1}`, source: node.location }], source: node.location }, ...nodes], source: node.location })), source: node.location });
     const explicitId = stringOption(options.id) ?? stringOption(options.label);
     const attributes = revealAttributes(options);
     if (options.noframenumbering === true) attributes["data-visibility"] = "uncounted";

@@ -39,6 +39,13 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain('class="rt-slide-stack" data-transition="convex" data-transition-speed="fast"');
   });
 
+  it("renders footnotes", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{F}Text\footnote{Note text}\end{frame}\end{document}`);
+    expect(vue).toContain('class="rt-footnote-ref"');
+    expect(vue).toContain('class="rt-footnotes"');
+    expect(vue).toContain("Note text");
+  });
+
   it("renders markdown via v-html", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{M}\begin{markdown}
 # Hello

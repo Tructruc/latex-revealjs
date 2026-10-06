@@ -83,6 +83,8 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
     case "math": return `<RevealMath ${node.display ? "display " : ""}:tex=${quoteBinding(node.tex)} />`;
     case "format": {
       const color = typeof node.options?.color === "string" ? node.options.color : undefined;
+      if (node.style === "footnote") return `<sup class="rt-footnote-ref">${renderNodes(node.children, state)}</sup>`;
+      if (node.style === "footnote-marker") return `<sup class="rt-footnote-marker">${renderNodes(node.children, state)}</sup>`;
       if (node.style === "textcolor" && color) return `<span class="rt-textcolor" style=${quote(`color:${color}`)}>${renderNodes(node.children, state)}</span>`;
       if (node.style === "colorbox" && color) return `<span class="rt-colorbox" style=${quote(`background:${color}`)}>${renderNodes(node.children, state)}</span>`;
       return `<span class=${quote(`rt-${node.style}`)}>${renderNodes(node.children, state)}</span>`;

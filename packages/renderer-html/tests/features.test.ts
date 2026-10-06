@@ -35,6 +35,13 @@ describe("HTML renderer reveal features", () => {
     expect(html).toContain('class="rt-slot" data-slot="right"');
   });
 
+  it("renders footnotes", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{F}Text\footnote{Note text}\end{frame}\end{document}`);
+    expect(html).toContain('class="rt-footnote-ref"');
+    expect(html).toContain('class="rt-footnotes"');
+    expect(html).toContain("Note text");
+  });
+
   it("renders markdown to html", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{M}\begin{markdown}
 # Hello
