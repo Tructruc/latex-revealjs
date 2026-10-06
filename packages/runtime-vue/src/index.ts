@@ -1,0 +1,10 @@
+export { default as RevealDeck } from "./RevealDeck.vue";
+export { default as RevealSlide } from "./RevealSlide.vue";
+export { default as RevealFragment } from "./RevealFragment.vue";
+export { default as RevealNotes } from "./RevealNotes.vue";
+export { default as RevealMath } from "./RevealMath.vue";
+export { default as RevealCode } from "./RevealCode.vue";
+export { default as Mermaid } from "./Mermaid.vue";
+export { useRevealContext, usePresentationLifecycle } from "./reveal-context";
+export { applyOverlayVisibility, currentOverlayNumber, overlayShouldHide } from "./overlays";
+export type { RevealContext, RevealEvent, RevealEventListener, RevealEventName } from "./reveal-context";

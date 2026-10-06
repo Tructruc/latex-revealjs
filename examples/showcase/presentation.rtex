@@ -1,0 +1,114 @@
+\documentclass{reveal}
+\title{Signals in Motion}
+\subtitle{A RevealTeX keynote}
+\author{RevealTeX}
+\institute{RevealTeX Labs}
+\date{Runtime integration showcase}
+\theme{aurora}
+\transition{slide}
+\transitionspeed{fast}
+\newcommand{\R}{\mathbb{R}}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{The idea}
+\begin{frame}{A language for visual thinking}
+\begin{itemize}
+\item<1-> Structured like a technical document
+\item<2-> Animated like a modern web presentation
+\item<3-> Extended with real Vue components
+\end{itemize}
+\end{frame}
+\begin{frame}[layout=HeroSplit]{One expressive model}
+\slot{left}{\[x \in \R^d,\quad y = \sigma(w^T x+b)\]\fragment[fade-up]{Meaning stays separate from rendering.}}
+\slot{right}{\ArchitectureDiagram[layers=6,animated=true,mode=training]}
+\end{frame}
+\begin{frame}[transition=zoom]{Performance}
+\framesubtitle{Validation and latency at a glance}
+\begin{columns}[gap=2rem,align=center]
+\column{0.33}\MetricCard[value=94.7,suffix={\%},label={Accuracy},trend=3.1]
+\column{0.33}\MetricCard[value=12.4,suffix={ms},label={Latency},trend=-18.2]
+\column{0.33}\MetricCard[value=2.1,suffix={GB},label={Memory}]
+\end{columns}
+\animate[effect=fly-in-bottom,duration=700ms,delay=120ms,easing={cubic-bezier(.22,1,.36,1)}]{Animation timing is authored, not hard-coded.}
+\note{Pause here and explain the validation setup.}
+\end{frame}
+\begin{frame}[center,autoanimate,transition=fade]{A stable identity}
+\element[id=model]{\ShowcaseCounter{12}}
+\end{frame}
+\begin{frame}[center,autoanimate,transition=fade]{A stable identity}
+\element[id=model]{\ShowcaseCounter{96.1}}
+\end{frame}
+\begin{frame}{Code is content}
+\begin{code}[language=typescript,numbers=true,highlight={2}]
+const deck = compile(source)
+await renderer.render(deck)
+\end{code}
+The compiler preserves the source model.
+\pause
+The renderer adds framework-specific behavior only at the edge.
+\end{frame}
+\begin{frame}[state=overlays,transition=fade]{Beamer-style overlays}
+\begin{itemize}
+\item<1-> Always visible from the first overlay
+\item<2-> Appears on the second overlay
+\item<3-> Appears on the third overlay
+\end{itemize}
+\only<4>{This content only exists on the fourth step.}
+\uncover<5->{This is uncovered from the fifth step onward.}
+\alt<6>{Shown before overlay six}{Shown from overlay six}
+\end{frame}
+\begin{frame}{Step-by-step derivations}
+\begin{steps}
+\[ f(x)=x^2 \]
+\[ f'(x)=2x \]
+\[ f'(3)=6 \]
+\end{steps}
+\begin{align}
+\mathcal{L} &= \sum_i (y_i - \hat{y}_i)^2 \\
+\hat{y}_i &= \sigma(w^T x_i + b)
+\end{align}
+\end{frame}
+\begin{frame}[state=layout]{Reveal layout utilities}
+\hstack{Side by side}\fittext{This text fits itself to the available width.}
+\vstack{Lines}\stretch{Stretch to the remaining space.}
+\end{frame}
+\begin{section}[transition=convex,transition-speed=fast]{Behind the model}
+\begin{frame}{The forward pass}
+\[h = \sigma(Wx+b)\]
+Navigate down to inspect the training objective.
+\AssetPreview[source={assets/pipeline.svg},label={Imported through a typed component asset prop}]
+\LifecycleProbe[]
+\end{frame}
+\begin{subframe}{The objective}
+\[\mathcal{L} = -\sum_i y_i \log \hat{y}_i\]
+\begin{block}{Cross-entropy}
+The negative log-likelihood of the target class.
+\end{block}
+\callout[info]{Vertical slides keep related detail on \textcolor{#a5b4fc}{one navigation branch}.}
+\badge{Framework-neutral IR}
+\end{subframe}
+\end{section}
+\begin{frame}[state=table]{Results at a glance}
+\begin{table}[header=true,caption={Validation metrics}]
+Metric & Value \\
+Accuracy & 94.7% \\
+Latency & 12.4 ms \\
+\end{table}
+Read more at \href{https://revealjs.com}{revealjs.com}.
+\begin{itemize}[<+->]
+\item Incremental lists reveal one item at a time.
+\item The renderer and compiler stay decoupled.
+\end{itemize}
+\end{frame}
+\begin{frame}{A diagram}
+\begin{mermaid}
+graph LR
+  Author --> Compiler --> IR --> Renderer --> Reveal[JavaScript]
+\end{mermaid}
+\end{frame}
+\begin{frame}[center,transition=zoom]{Thank You}
+\backgroundgradient{linear-gradient(135deg, #111827, #312e81)}
+\Huge{Questions?}
+\end{frame}
+\end{document}

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.revealtex/
+generated/
+.tmp-cli-debug/
+.opencode/
+coverage/

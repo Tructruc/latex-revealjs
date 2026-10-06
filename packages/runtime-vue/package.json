@@ -1,0 +1,6 @@
+{
+  "name": "@revealtex/runtime-vue", "version": "0.1.0", "type": "module",
+  "exports": { ".": "./src/index.ts", "./theme.css": "./src/theme.css", "./animations.css": "./src/animations.css" },
+  "dependencies": { "katex": "^0.16.22" },
+  "peerDependencies": { "vue": "^3.5.0", "reveal.js": "^5.1.0" }
+}

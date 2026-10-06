@@ -1,0 +1,3 @@
+<script setup lang="ts">const props=withDefaults(defineProps<{layers?:number;animated?:boolean;mode?:string}>(),{layers:4});</script>
+<template><div class="architecture"><i v-for="layer in props.layers" :key="layer" :style="{animationDelay:`${layer*100}ms`}" /> <span>{{ mode }}</span></div></template>
+<style scoped>.architecture{display:flex;align-items:center;gap:.5rem}.architecture i{width:2rem;height:9rem;border-radius:1rem;background:linear-gradient(#8b5cf6,#4f46e5);animation:rise .7s both}.architecture span{font-size:.6em;color:#94a3b8}@keyframes rise{from{opacity:0;transform:translateY(2rem)}}</style>

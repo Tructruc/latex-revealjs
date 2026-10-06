@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 230" role="img" aria-labelledby="title description">
+  <title id="title">Three-stage model pipeline</title>
+  <desc id="description">Input flows to representation and then output.</desc>
+  <defs>
+    <linearGradient id="card" x1="0" x2="1">
+      <stop stop-color="#7c3aed"/><stop offset="1" stop-color="#4f46e5"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#a78bfa"/>
+    </marker>
+  </defs>
+  <g fill="url(#card)" stroke="#c4b5fd" stroke-opacity=".5" stroke-width="2">
+    <rect x="30" y="45" width="220" height="140" rx="28"/>
+    <rect x="340" y="45" width="220" height="140" rx="28"/>
+    <rect x="650" y="45" width="220" height="140" rx="28"/>
+  </g>
+  <g stroke="#a78bfa" stroke-width="8" marker-end="url(#arrow)">
+    <path d="M265 115h55"/><path d="M575 115h55"/>
+  </g>
+  <g fill="#fff" font-family="Inter,system-ui,sans-serif" font-size="32" text-anchor="middle">
+    <text x="140" y="126">Input</text><text x="450" y="126">Representation</text><text x="760" y="126">Output</text>
+  </g>
+</svg>
