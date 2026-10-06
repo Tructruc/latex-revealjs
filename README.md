@@ -123,7 +123,7 @@ Accuracy & 94.7% \\
 \end{table}
 ```
 
-Links compile to real anchors: `\href{https://revealjs.com}{revealjs.com}` and `\url{https://revealjs.com}`. Inline formatting includes `\textbf`, `\textit`, `\emph`/`\em`, `\texttt`, `\textsf`, `\textsc`, `\underline`, `\alert`, `\small`, `\large`, `\Huge`, and `\textcolor{...}{...}`; `\includegraphics` is an alias for `\image`.
+Links compile to real anchors: `\href{https://revealjs.com}{revealjs.com}`, `\url{https://revealjs.com}`, and `\hyperlink{slide-label}{jump}` for cross-slide navigation. Inline formatting includes `\textbf`, `\textit`, `\emph`/`\em`, `\texttt`, `\textsf`, `\textsc`, `\underline`, `\alert`, `\small`, `\large`, `\Huge`, and `\textcolor{...}{...}`; `\includegraphics` is an alias for `\image`.
 
 A minimal deck lives in [`examples/minimal`](./examples/minimal).
 
