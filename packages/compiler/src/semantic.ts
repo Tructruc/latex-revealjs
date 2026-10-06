@@ -27,6 +27,17 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
   let currentSection: { title?: string; slides: SlideIR[]; source: SourceLocation; type: "section" } | undefined;
   let slideNumber = 0;
   let tocRequested = false;
+  let overlayCursor = 1;
+  const resolveOverlay = (raw?: string): { start: number; end?: number } | undefined => {
+    const parsed = parseOverlay(raw);
+    if (parsed) return parsed;
+    if (!raw) return undefined;
+    const body = raw.trim().replace(/>$/, "");
+    if (body === "+") return { start: ++overlayCursor, end: overlayCursor };
+    const match = body.match(/^\+\s*-\s*(\d*)$/);
+    if (match) { overlayCursor++; return match[1] ? { start: overlayCursor, end: overlayCursor + Number(match[1]) - 1 } : { start: overlayCursor }; }
+    return undefined;
+  };
 
   const compile = (nodes: AstNode[]): PresentationNode[] => {
     const out: PresentationNode[] = [];
@@ -48,20 +59,20 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       case "fragment": {
         const shorthand = node.optionalArguments[0]?.raw.trim();
         const effect = typeof options.effect === "string" ? options.effect : shorthand && !shorthand.includes("=") ? shorthand : undefined;
-        const overlay = parseOverlay(node.overlay);
+        const overlay = resolveOverlay(node.overlay);
         const explicitIndex = numberOption(options.index);
         const index = explicitIndex ?? (overlay && overlay.start > 1 ? overlay.start - 1 : undefined);
         return [{ type: "fragment", effect, index, start: overlay?.start, end: overlay?.end, children: flow(children()), source: node.location }];
       }
-      case "only": case "uncover": case "visible": case "onslide": return overlayContent(node.name === "only", node.overlay, flow(children()), node.location);
+      case "only": case "uncover": case "visible": case "onslide": return overlayContent(node.name === "only", resolveOverlay(node.overlay), flow(children()), node.location);
       case "alt": {
-        const range = parseOverlay(node.overlay); const n = range?.start ?? 1; const out: PresentationNode[] = [];
+        const range = resolveOverlay(node.overlay); const n = range?.start ?? 1; const out: PresentationNode[] = [];
         if (n > 1) out.push({ type: "fragment", start: 1, end: n - 1, children: flow(children(0)), source: node.location });
         out.push({ type: "fragment", index: n > 1 ? n - 1 : undefined, start: n, end: range?.end, children: flow(children(1)), source: node.location });
         return out;
       }
       case "temporal": {
-        const range = parseOverlay(node.overlay); const n = range?.start ?? 1; const out: PresentationNode[] = [];
+        const range = resolveOverlay(node.overlay); const n = range?.start ?? 1; const out: PresentationNode[] = [];
         if (n > 1) out.push({ type: "fragment", start: 1, end: n - 1, children: flow(children(0)), source: node.location });
         out.push({ type: "fragment", index: n > 1 ? n - 1 : undefined, start: n, end: n, only: true, children: flow(children(1)), source: node.location });
         out.push({ type: "fragment", index: n, start: n + 1, children: flow(children(2)), source: node.location });
@@ -118,7 +129,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       let incrementalIndex = 0;
       const flush = () => {
         if (itemCommand) {
-          const overlay = parseOverlay(itemCommand.overlay);
+          const overlay = resolveOverlay(itemCommand.overlay);
           let index = overlay && overlay.start > 1 ? overlay.start - 1 : undefined;
           let start = overlay?.start;
           if (!overlay && incremental) { incrementalIndex++; index = incrementalIndex; start = incrementalIndex + 1; }
@@ -210,6 +221,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       else if (child.name === "backgroundiframe") background.iframe = value;
       return false;
     });
+    overlayCursor = 1;
     const body = compile(contentAst); const notes = body.filter(n => n.type === "notes").flatMap(n => n.children); const children = flow(body.filter(n => n.type !== "notes"));
     const explicitId = stringOption(options.id) ?? stringOption(options.label);
     const attributes = revealAttributes(options);
@@ -312,8 +324,7 @@ function parseOverlay(spec?: string): { start: number; end?: number } | undefine
   if (single) return { start: Number(single[1]), end: Number(single[1]) };
   return undefined;
 }
-function overlayContent(only: boolean, overlay: string | undefined, children: PresentationNode[], source: SourceLocation): PresentationNode[] {
-  const range = parseOverlay(overlay);
+function overlayContent(only: boolean, range: { start: number; end?: number } | undefined, children: PresentationNode[], source: SourceLocation): PresentationNode[] {
   if (!range || (range.start <= 1 && range.end === undefined)) return children;
   return [{ type: "fragment", index: range.start > 1 ? range.start - 1 : undefined, start: range.start, end: range.end, only, children, source }];
 }
