@@ -228,7 +228,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     overlayCursor = 1;
     footnotes = [];
     const body = compile(contentAst); const notes = body.filter(n => n.type === "notes").flatMap(n => n.children); const children = flow(body.filter(n => n.type !== "notes"));
-    if (footnotes.length) children.push({ type: "container", kind: "footnotes", options: {}, children: footnotes.map((nodes, index) => ({ type: "paragraph", children: [{ type: "format", style: "footnote-marker", children: [{ type: "text", value: `${index + 1}`, source: node.location }], source: node.location }, ...nodes], source: node.location })), source: node.location });
+    if (footnotes.length) children.push({ type: "container", kind: "footnotes", options: {}, children: footnotes.map((nodes, index) => ({ type: "paragraph", children: [{ type: "format", style: "footnote-marker", children: [{ type: "text", value: `${index + 1}`, source: node.location }], source: node.location }, ...nodes.flatMap(inner => inner.type === "paragraph" ? inner.children : [inner])], source: node.location })), source: node.location });
     const explicitId = stringOption(options.id) ?? stringOption(options.label);
     const attributes = revealAttributes(options);
     if (options.noframenumbering === true) attributes["data-visibility"] = "uncounted";
