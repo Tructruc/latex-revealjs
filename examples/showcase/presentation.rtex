@@ -101,6 +101,19 @@ Read more at \href{https://revealjs.com}{revealjs.com}.
 \item The renderer and compiler stay decoupled.
 \end{itemize}
 \end{frame}
+\begin{frame}{Markdown blocks}
+\begin{markdown}
+## Written in Markdown
+
+- Compiles at build time
+- **Bold**, *italic*, and `inline code`
+
+| Feature | Status |
+| --- | --- |
+| Tables | yes |
+| Lists | yes |
+\end{markdown}
+\end{frame}
 \begin{frame}{A diagram}
 \begin{mermaid}
 graph LR

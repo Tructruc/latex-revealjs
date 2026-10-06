@@ -39,6 +39,18 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain('class="rt-slide-stack" data-transition="convex" data-transition-speed="fast"');
   });
 
+  it("renders markdown via v-html", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{M}\begin{markdown}
+# Hello
+
+Some **bold** text.
+\end{markdown}\end{frame}\end{document}`);
+    expect(vue).toContain('class="rt-markdown" v-html="rtMarkdown0"');
+    expect(vue).toContain("const rtMarkdown0 =");
+    expect(vue).toContain(">Hello</h1>");
+    expect(vue).toContain("<strong>bold</strong>");
+  });
+
   it("renders textcolor and verbatim code", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{V}\begin{verbatim}
 x = 1

@@ -31,6 +31,7 @@ export interface ColumnsIR extends BaseIR { type: "columns"; gap?: string; align
 export interface MediaIR extends BaseIR { type: "image" | "video" | "svg"; src: string; options: Record<string, PropertyValue> }
 export interface CodeIR extends BaseIR { type: "code"; code: string; language?: string; options: Record<string, PropertyValue> }
 export interface DiagramIR extends BaseIR { type: "diagram"; kind: string; code: string }
+export interface MarkdownIR extends BaseIR { type: "markdown"; content: string }
 export interface LinkIR extends BaseIR { type: "link"; href: string; children: PresentationNode[] }
 export interface TableIR extends BaseIR { type: "table"; rows: string[][]; header: boolean; caption?: string; options: Record<string, PropertyValue> }
 export interface SlotIR extends BaseIR { type: "slot"; name: string; children: PresentationNode[] }
@@ -55,7 +56,7 @@ export interface SlideIR extends BaseIR {
 export interface SectionIR extends BaseIR { type: "section"; title?: string; slides: SlideIR[] }
 export interface SlideStackIR extends BaseIR { type: "slide-stack"; title?: string; slides: SlideIR[]; transition?: { effect?: string; speed?: string }; attributes?: Record<string, string> }
 export type NavigationIR = SlideIR | SlideStackIR;
-export type PresentationNode = TextIR | ParagraphIR | MathIR | FormattingIR | FragmentIR | AnimationIR | ListIR | ListItemIR | ColumnsIR | ColumnIR | MediaIR | CodeIR | DiagramIR | LinkIR | TableIR | SlotIR | NotesIR | ComponentIR | ElementIR | RawRendererBlockIR | ContainerIR;
+export type PresentationNode = TextIR | ParagraphIR | MathIR | FormattingIR | FragmentIR | AnimationIR | ListIR | ListItemIR | ColumnsIR | ColumnIR | MediaIR | CodeIR | DiagramIR | MarkdownIR | LinkIR | TableIR | SlotIR | NotesIR | ComponentIR | ElementIR | RawRendererBlockIR | ContainerIR;
 export interface AssetReference { kind: "image" | "video" | "svg" | "stylesheet" | "script" | "data"; path: string; source: SourceLocation }
 export interface PresentationIR {
   type: "presentation"; metadata: PresentationMetadata; configuration: PresentationConfiguration; slides: SlideIR[]; sections: SectionIR[];

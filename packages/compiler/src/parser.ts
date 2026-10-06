@@ -1,7 +1,7 @@
 import type { ArgumentNode, AstNode, CommandNode, DocumentNode, EnvironmentNode, MathNode, SourceLocation, SourcePosition, TextNode } from "./ast.js";
 import { RevealTeXError } from "./diagnostics.js";
 
-const RAW_ENVIRONMENTS = new Set(["code", "verbatim", "lstlisting", "vue", "html", "react", "mermaid", "table", "tabular", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "split", "aligned", "gathered", "displaymath", "math", "eqnarray", "eqnarray*"]);
+const RAW_ENVIRONMENTS = new Set(["code", "verbatim", "lstlisting", "markdown", "vue", "html", "react", "mermaid", "table", "tabular", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "split", "aligned", "gathered", "displaymath", "math", "eqnarray", "eqnarray*"]);
 
 export class Parser {
   private offset = 0;

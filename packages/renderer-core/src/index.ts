@@ -12,3 +12,4 @@ export class RendererRegistry {
 }
 export const rendererRegistry = new RendererRegistry();
 export function registerRenderer(renderer: PresentationRenderer): void { rendererRegistry.register(renderer); }
+export * from "./markdown.js";

@@ -28,6 +28,17 @@ describe("HTML renderer reveal features", () => {
     expect(html).toContain('class="rt-overlay fragment"');
   });
 
+  it("renders markdown to html", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{M}\begin{markdown}
+# Hello
+
+Some **bold** text.
+\end{markdown}\end{frame}\end{document}`);
+    expect(html).toContain('<div class="rt-markdown">');
+    expect(html).toContain(">Hello</h1>");
+    expect(html).toContain("<strong>bold</strong>");
+  });
+
   it("renders textcolor and verbatim code", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{V}\begin{verbatim}
 x = 1

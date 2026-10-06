@@ -35,6 +35,10 @@ describe("reveal feature coverage",()=>{
 \end{mermaid}\end{frame}\end{document}`);const diagram=r.presentation.slides[0]?.children.find(n=>n.type==="diagram");expect(diagram).toMatchObject({type:"diagram",kind:"mermaid"});expect(diagram?.type==="diagram"&&diagram.code).toContain("A --> B");});
   it("propagates vertical section transitions onto the stack",()=>{const r=compile(String.raw`\begin{document}\begin{section}[transition=convex,transition-speed=fast]{Deep}\begin{frame}{A}A\end{frame}\end{section}\end{document}`);expect(r.presentation.navigation[0]).toMatchObject({type:"slide-stack",transition:{effect:"convex",speed:"fast"}});});
   it("understands beamer frame options",()=>{const r=compile(String.raw`\begin{document}\begin{frame}[label=intro,c,noframenumbering,fragile]{Intro}\begin{verbatim}x\end{verbatim}\end{frame}\end{document}`);const slide=r.presentation.slides[0];expect(slide?.id).toBe("intro");expect(slide?.center).toBe(true);expect(slide?.attributes["data-visibility"]).toBe("uncounted");expect(slide?.attributes["data-fragile"]).toBeUndefined();expect(slide?.attributes["data-c"]).toBeUndefined();});
+  it("compiles markdown blocks into markdown IR",()=>{const r=compile(String.raw`\begin{document}\begin{frame}{M}\begin{markdown}# Title
+- a
+- b
+\end{markdown}\end{frame}\end{document}`);const md=r.presentation.slides[0]?.children.find(n=>n.type==="markdown");expect(md?.type==="markdown"&&md.content).toContain("# Title");});
   it("supports verbatim, textcolor, and institute metadata",()=>{const r=compile(String.raw`\documentclass{reveal}\institute{Labs}\begin{document}\begin{frame}{V}\begin{verbatim}
 a = 1
   b = 2
