@@ -105,8 +105,8 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       case "inserttotalframenumber": return [{ type: "format", style: "totalframenumber", children: [], source: node.location }];
       case "ref": case "pageref": return [{ type: "format", style: "ref", options: { target: arg() }, children: [{ type: "text", value: arg(), source: node.location }], source: node.location }];
       case "linebreak": return [{ type: "format", style: "linebreak", children: [], source: node.location }];
-      case "textcolor": return [{ type: "format", style: "textcolor", options: { color: arg() }, children: children(1), source: node.location }];
-      case "colorbox": return [{ type: "format", style: "colorbox", options: { color: arg() }, children: children(1), source: node.location }];
+      case "textcolor": return [{ type: "format", style: "textcolor", options: { color: resolveColor(arg()) }, children: children(1), source: node.location }];
+      case "colorbox": return [{ type: "format", style: "colorbox", options: { color: resolveColor(arg()) }, children: children(1), source: node.location }];
       case "href": return [{ type: "link", href: arg(), children: children(1), source: node.location }];
       case "hyperlink": return [{ type: "link", href: `#/${arg()}`, children: children(1), source: node.location }];
       case "url": return [{ type: "link", href: arg(), children: [{ type: "text", value: arg(), source: node.location }], source: node.location }];
@@ -398,6 +398,8 @@ function padOverlaySteps(nodes: PresentationNode[], source: SourceLocation): voi
   visit(nodes);
   for (let index = 1; index < maxOverlay; index++) if (!indices.has(index)) nodes.push({ type: "fragment", index, children: [], source });
 }
+const COLOR_NAMES: Record<string, string> = { RoyalBlue: "#4169e1", RoyalPurple: "#7851a9", ForestGreen: "#228b22", SeaGreen: "#2e8b57", MidnightBlue: "#191970", SteelBlue: "#4682b4", SkyBlue: "#87ceeb", Navy: "#001f3f", Teal: "#008080", Maroon: "#800000", Olive: "#808000", Plum: "#dda0dd", Orchid: "#da70d6", Tomato: "#ff6347", Crimson: "#dc143c", Gold: "#ffd700", Orange: "#ffa500", Brown: "#a52a2a", Gray: "#808080", LightGray: "#d3d3d3", DarkSlateBlue: "#483d8b", CadetBlue: "#5f9ea0", RebeccaPurple: "#663399" };
+function resolveColor(value: string): string { return COLOR_NAMES[value.trim()] ?? value; }
 function rawCode(raw: string): string { return raw.replace(/^\n/, "").replace(/\n[ \t]*$/, ""); }
 function parseTable(raw: string): { rows: string[][]; windows: (OverlayWindow[] | undefined)[] } {
   const cleaned = raw.replace(/\\(?:hline|toprule|midrule|bottomrule|hdashline)\b/g, "").replace(/\\cline\{[^}]*\}/g, "");
