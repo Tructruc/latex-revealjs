@@ -186,6 +186,12 @@ x = 1
     expect(vue).toContain('<div class="rt-container__title">Idea</div>');
   });
 
+  it("supports column overlays", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{C}\begin{columns}\column<2->{0.5}A\end{columns}\end{frame}\end{document}`);
+    expect(vue).toContain('class="rt-column fragment"');
+    expect(vue).toContain("data-rt-overlay-start");
+  });
+
   it("renders table row overlays", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{T}\begin{table}[header=true]H1 & H2 \\ \only<2-> a & b \\ \end{table}\end{frame}\end{document}`);
     expect(vue).toContain('data-rt-overlay-windows="2:"');

@@ -169,7 +169,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     }
     if (node.name === "columns") {
       const columns: ColumnIR[] = []; let current: AstNode[] = []; let currentCommand: CommandNode | undefined;
-      const flush = () => { if (currentCommand || current.some(n => n.type !== "text" || n.value.trim())) columns.push({ type: "column", width: currentCommand?.requiredArguments[0]?.raw.trim(), align: currentCommand?.optionalArguments[0]?.raw.trim() || undefined, children: flow(compile(current)), source: currentCommand?.location ?? node.location }); current = []; };
+      const flush = () => { if (currentCommand || current.some(n => n.type !== "text" || n.value.trim())) { const overlay = resolveOverlay(currentCommand?.overlay); columns.push({ type: "column", width: currentCommand?.requiredArguments[0]?.raw.trim(), align: currentCommand?.optionalArguments[0]?.raw.trim() || undefined, index: overlay && overlay.start > 1 ? overlay.start - 1 : undefined, start: overlay?.start, end: overlay?.end, windows: overlay?.windows, children: flow(compile(current)), source: currentCommand?.location ?? node.location }); } current = []; };
       for (const child of node.children) { if (child.type === "command" && child.name === "column") { flush(); currentCommand = child; } else current.push(child); }
       flush(); return [{ type: "columns", gap: stringOption(options.gap), alignment: stringOption(options.align), columns, source: node.location }];
     }
