@@ -5,7 +5,7 @@ import { parseOptions, parseValue } from "./options.js";
 import { revealAttributes } from "./attributes.js";
 
 export interface SemanticResult { presentation: PresentationIR; diagnostics: import("./diagnostics.js").Diagnostic[] }
-const FORMATS = new Set(["textbf", "textit", "emph", "underline", "alert", "structure", "tiny", "scriptsize", "footnotesize", "small", "normalsize", "large", "Large", "LARGE", "huge", "Huge", "em", "texttt", "textsf", "textsc", "textrm", "textnormal", "textsuperscript", "textsubscript"]);
+const FORMATS = new Set(["textbf", "textit", "emph", "underline", "alert", "structure", "tiny", "scriptsize", "footnotesize", "small", "normalsize", "large", "Large", "LARGE", "huge", "Huge", "em", "texttt", "textsf", "textsc", "textrm", "textnormal", "textsl", "textup", "textmd", "textsuperscript", "textsubscript"]);
 const FORMAT_ALIASES: Record<string, string> = { em: "emph" };
 const PAUSE_BOUNDARY = "__revealtex_pause_boundary__";
 const MATH_ENVIRONMENTS = new Set(["equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "split", "aligned", "gathered", "displaymath", "math", "eqnarray", "eqnarray*"]);
