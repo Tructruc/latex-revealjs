@@ -1,0 +1,19 @@
+\documentclass{reveal}
+\title{Custom Components}
+\subtitle{Registering and composing Vue components}
+\author{RevealTeX}
+\theme{midnight}
+\begin{document}
+\maketitle
+\begin{frame}{Component shorthand}
+\StatCard[value=42,label={Widgets shipped},trend=12.5]
+\StatCard[value=8,label={Open bugs},trend=-40]
+\end{frame}
+\begin{frame}{Children and named slots}
+\begin{FeatureCard}
+\slot{title}{Fast by construction}
+\slot{icon}{\textbf{*}}
+Everything is compiled locally, so there is no round trip to a server.
+\end{FeatureCard}
+\end{frame}
+\end{document}

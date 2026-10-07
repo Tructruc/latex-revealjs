@@ -221,6 +221,15 @@ describe.sequential("RevealTeX CLI integration", () => {
     await expect(runCli(["build", fixture.source, "--config", fixture.config, "--output", fixture.output])).rejects.toThrow(/RTX3003/);
   }, 20_000);
 
+  it("builds the bundled custom-components example", async () => {
+    const output = await mkdtemp(join(tmpdir(), "revealtex-example-"));
+    temporaryDirectories.add(output);
+    await runCli(["build", join(repositoryRoot, "examples/custom-components/presentation.rtex"), "--config", join(repositoryRoot, "examples/custom-components/revealtex.config.ts"), "--output", output]);
+    const vue = await readFile(join(output, "Presentation.generated.vue"), "utf8");
+    expect(vue).toContain("import StatCard from");
+    expect(vue).toContain("import FeatureCard from");
+  }, 20_000);
+
   it("scaffolds a starter project with init", async () => {
     const root = await mkdtemp(join(tmpdir(), "revealtex-init-"));
     temporaryDirectories.add(root);
