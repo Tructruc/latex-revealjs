@@ -91,6 +91,11 @@ A-->B
     expect(vue).toContain("transform:rotate(90deg) scale(1.5)");
   });
 
+  it("renders audio media", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{A}\audio[controls]{clip.mp3}\end{frame}\end{document}`);
+    expect(vue).toContain("<audio ");
+  });
+
   it("supports media loading and title attributes", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{I}\image[alt={A},loading=lazy,title={T}]{a.png}\end{frame}\end{document}`);
     expect(vue).toContain('loading="lazy"');
