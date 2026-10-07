@@ -15,7 +15,7 @@ const REVEAL_UTILITY_CONTAINERS: Record<string, string> = { fittext: "fit-text",
 const BLOCK_ENVIRONMENTS = new Set(["block", "alertblock", "exampleblock", "theorem", "lemma", "corollary", "proposition", "definition", "example", "proof", "remark"]);
 const ALIGN_ENVIRONMENTS: Record<string, string> = { center: "align-center", flushleft: "align-left", flushright: "align-right", quote: "quote", quotation: "quote" };
 const OVERLAY_COMMANDS = new Set(["only", "uncover", "visible", "onslide", "alt", "temporal"]);
-const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "hyperlink", "textcolor", "colorbox", "footnote", "includegraphics", "framesubtitle", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
+const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "hyperlink", "textcolor", "colorbox", "footnote", "includegraphics", "frametitle", "framesubtitle", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
 
 export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceFiles: string[] = [ast.location.file]): SemanticResult {
   const diagnostics: import("./diagnostics.js").Diagnostic[] = [];
@@ -200,7 +200,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
 
   const createSlide = (node: EnvironmentNode): SlideIR => {
     slideNumber++; const options = parseOptions(node.optionalArguments[0]?.raw); const titleRaw = node.requiredArguments[0]?.raw.trim();
-    const title = node.requiredArguments[0] ? compile(node.requiredArguments[0].children) : undefined;
+    let title = node.requiredArguments[0] ? compile(node.requiredArguments[0].children) : undefined;
     const background: SlideBackground = {
       color: stringOption(options.background) ?? stringOption(options["background-color"]),
       image: stringOption(options["background-image"]),
@@ -219,6 +219,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     let subtitle: PresentationNode[] | undefined;
     const contentAst = node.children.filter(child => {
       if (child.type === "command" && child.name === "framesubtitle") { subtitle = compile(child.requiredArguments[0]?.children ?? []); return false; }
+      if (child.type === "command" && child.name === "frametitle") { title = compile(child.requiredArguments[0]?.children ?? []); return false; }
       if (child.type !== "command" || !BACKGROUND_COMMANDS.has(child.name)) return true;
       const value = child.requiredArguments[0]?.raw.trim();
       if (child.name === "background" || child.name === "backgroundcolor") background.color = value;
