@@ -158,6 +158,16 @@ x = 1
     expect(html).toContain("chart.js@4");
   });
 
+  it("inlines external code files", async () => {
+    const sourceFile = fileURLToPath(new URL("./features.test.ts", import.meta.url));
+    const codeFile = fileURLToPath(new URL("./fixtures/sample.ts", import.meta.url));
+    const { presentation } = compile(String.raw`\begin{document}\begin{frame}{L}\lstinputlisting[language=ts]{./fixtures/sample.ts}\end{frame}\end{document}`, { file: sourceFile });
+    const result = await new HtmlRenderer().render(presentation, { sourceFile, outputDirectory: "/tmp/out", config: {} });
+    const html = result.files.find(file => file.path === "index.html")?.content ?? "";
+    expect(html).toContain("INLINE CODE MARKER");
+    expect(result.dependencies ?? []).toContain(codeFile);
+  });
+
   it("renders mermaid diagrams with the CDN runtime", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{D}\begin{mermaid}graph LR
   A --> B
