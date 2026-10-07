@@ -33,7 +33,7 @@ export interface ListIR extends BaseIR { type: "list"; ordered: boolean; items: 
 export interface ColumnIR extends BaseIR { type: "column"; width?: string; children: PresentationNode[] }
 export interface ColumnsIR extends BaseIR { type: "columns"; gap?: string; alignment?: string; columns: ColumnIR[] }
 export interface MediaIR extends BaseIR { type: "image" | "video" | "svg"; src: string; options: Record<string, PropertyValue> }
-export interface CodeIR extends BaseIR { type: "code"; code: string; language?: string; options: Record<string, PropertyValue> }
+export interface CodeIR extends BaseIR { type: "code"; code: string; language?: string; options: Record<string, PropertyValue>; src?: string }
 export interface DiagramIR extends BaseIR { type: "diagram"; kind: string; code: string; options: Record<string, PropertyValue> }
 export interface MarkdownIR extends BaseIR { type: "markdown"; content: string }
 export interface LinkIR extends BaseIR { type: "link"; href: string; children: PresentationNode[] }

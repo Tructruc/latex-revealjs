@@ -101,7 +101,7 @@ Display math accepts `$$...$$`, `\[...\]`, and the `equation`, `align`, `gather`
 
 Reveal layout utilities are first-class containers: `\fittext{}`, `\stack{}`, `\hstack{}`, `\vstack{}`, `\stretch{}`, and `\frame{}`.
 
-Code blocks use reveal's highlight plugin, so `numbers=true` and `highlight={1|2|3}` produce real syntax colouring, line numbers, and stepped line highlighting. Mermaid diagrams compile to renderer-neutral IR:
+Code blocks use reveal's highlight plugin, so `numbers=true` and `highlight={1|2|3}` produce real syntax colouring, line numbers, and stepped line highlighting. External files can be included with `\lstinputlisting[language=ts]{src/app.ts}`. Mermaid diagrams compile to renderer-neutral IR:
 
 ```latex
 \begin{mermaid}

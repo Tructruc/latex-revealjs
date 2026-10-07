@@ -30,6 +30,12 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain(":index='1'");
   });
 
+  it("imports external code files with ?raw", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{L}\lstinputlisting[language=ts]{src/app.ts}\end{frame}\end{document}`);
+    expect(vue).toContain('from "/talk/src/app.ts?raw"');
+    expect(vue).toContain(':code="rtCode0"');
+  });
+
   it("applies media width, height, and class options", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{I}\image[width=50%,height=10em,class=hero]{a.png}\end{frame}\end{document}`);
     expect(vue).toContain("width:50%;height:10em");
