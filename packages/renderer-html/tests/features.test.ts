@@ -134,6 +134,12 @@ x = 1
     expect(html).toContain('data-background-size="cover"');
   });
 
+  it("renders audio media", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{A}\audio[controls]{clip.mp3}\end{frame}\end{document}`);
+    expect(html).toContain("<audio ");
+    expect(html).toContain("controls");
+  });
+
   it("renders movies as videos with posters", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{M}\movie{poster.jpg}{clip.mp4}\end{frame}\end{document}`);
     expect(html).toContain("<video ");
