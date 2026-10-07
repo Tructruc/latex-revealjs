@@ -16,7 +16,7 @@ const BLOCK_ENVIRONMENTS = new Set(["block", "alertblock", "exampleblock", "theo
 const ALIGN_ENVIRONMENTS: Record<string, string> = { center: "align-center", flushleft: "align-left", flushright: "align-right", quote: "quote", quotation: "quote" };
 const OVERLAY_COMMANDS = new Set(["only", "uncover", "visible", "onslide", "alt", "temporal"]);
 const NOOP_COMMANDS = new Set(["usepackage", "usetheme", "usecolortheme", "usefonttheme", "useinnertheme", "useoutertheme", "setbeamertemplate", "setbeamercolor", "setbeamerfont", "setbeamersize", "beamertemplatenavigationsymbolsempty", "hypersetup", "graphicspath", "bibliographystyle", "setlength"]);
-const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "titlegraphic", "logo", "theme", "reveal", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "hyperlink", "textcolor", "colorbox", "footnote", "includegraphics", "lstinputlisting", "frametitle", "framesubtitle", "label", "ref", "pageref", "againframe", "vspace", "hspace", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...NOOP_COMMANDS, ...FORMATS]);
+const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "titlegraphic", "logo", "theme", "reveal", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "hyperlink", "textcolor", "colorbox", "footnote", "includegraphics", "lstinputlisting", "frametitle", "framesubtitle", "label", "ref", "pageref", "againframe", "vspace", "hspace", "tableofcontents", "beamerdefaultoverlayspecification", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...NOOP_COMMANDS, ...FORMATS]);
 
 export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceFiles: string[] = [ast.location.file]): SemanticResult {
   const diagnostics: import("./diagnostics.js").Diagnostic[] = [];
@@ -31,6 +31,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
   let tocRequested = false;
   let overlayCursor = 1;
   let footnotes: PresentationNode[][] = [];
+  let defaultIncremental = false;
   const resolveOverlay = (raw?: string): { start: number; end?: number; windows?: OverlayWindow[] } | undefined => {
     const parsed = parseOverlay(raw);
     if (parsed) return { ...parsed, windows: parseOverlayWindows(raw) };
@@ -140,7 +141,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       const isDescription = node.name === "description";
       const items: ListItemIR[] = []; let current: AstNode[] = [];
       let itemCommand: CommandNode | undefined;
-      const incremental = options.incremental === true || options["<+->"] === true || options.overlay === "<+->";
+      const incremental = options.incremental === true || options["<+->"] === true || options.overlay === "<+->" || defaultIncremental;
       let incrementalIndex = 0;
       const flush = () => {
         if (itemCommand) {
@@ -279,11 +280,13 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       }
       if (node.name === "section") { beginSection(value, node.location); continue; }
       if (node.name === "tableofcontents") { tocRequested = true; continue; }
+      if (node.name === "beamerdefaultoverlayspecification") { defaultIncremental = (value ?? "").includes("+"); continue; }
       compileCommand(node);
     } else if (node.type === "environment" && node.name === "document") {
       for (const child of node.children) {
         if (child.type === "command" && child.name === "section") { beginSection(child.requiredArguments[0]?.raw.trim(), child.location); continue; }
         if (child.type === "command" && child.name === "tableofcontents") { tocRequested = true; continue; }
+        if (child.type === "command" && child.name === "beamerdefaultoverlayspecification") { defaultIncremental = (child.requiredArguments[0]?.raw ?? "").includes("+"); continue; }
         if (child.type === "command" && child.name === "reveal") { presentation.configuration.reveal = { ...(presentation.configuration.reveal ?? {}), ...parseOptions(child.optionalArguments[0]?.raw ?? child.requiredArguments[0]?.raw) }; continue; }
         if (child.type === "command" && child.name === "againframe") {
           const repeat = child.requiredArguments[0]?.raw.trim();
