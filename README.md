@@ -202,6 +202,8 @@ MetricCard: {
 }
 ```
 
+Layouts (`layouts`) support the same `html.renderer` hook, so a Vue layout can also be honoured by the portable HTML backend.
+
 The module exports a synchronous default function receiving `name`, typed `props`, rendered `children`, rendered `slots`, source location, an `escape()` helper, and an `asset()` helper for typed local assets. JavaScript, ESM, and TypeScript renderer modules are supported; failures produce a warning and fall back safely.
 
 Use `type: "asset"` for component props that point to presentation files. The compiler records them in the asset manifest and the Vue renderer emits Vite-native imports:
