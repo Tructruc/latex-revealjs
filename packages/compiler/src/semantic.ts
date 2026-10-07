@@ -16,7 +16,7 @@ const BLOCK_ENVIRONMENTS = new Set(["block", "alertblock", "exampleblock", "theo
 const ALIGN_ENVIRONMENTS: Record<string, string> = { center: "align-center", flushleft: "align-left", flushright: "align-right", quote: "quote", quotation: "quote" };
 const OVERLAY_COMMANDS = new Set(["only", "uncover", "visible", "onslide", "alt", "temporal"]);
 const NOOP_COMMANDS = new Set(["usepackage", "usetheme", "usecolortheme", "usefonttheme", "useinnertheme", "useoutertheme", "setbeamertemplate", "setbeamercolor", "setbeamerfont", "setbeamersize", "beamertemplatenavigationsymbolsempty", "hypersetup", "graphicspath", "bibliographystyle", "setlength", "subsection", "subsubsection", "part", "appendix", "vfill", "hrule", "centering"]);
-const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "titlegraphic", "logo", "theme", "reveal", "transition", "transitionspeed", "maketitle", "titlepage", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "email", "hyperlink", "linebreak", "smallskip", "medskip", "bigskip", "textcolor", "colorbox", "footnote", "includegraphics", "lstinputlisting", "frametitle", "framesubtitle", "label", "ref", "pageref", "againframe", "vspace", "hspace", "tableofcontents", "beamerdefaultoverlayspecification", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...NOOP_COMMANDS, ...FORMATS]);
+const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "titlegraphic", "logo", "theme", "reveal", "transition", "transitionspeed", "maketitle", "titlepage", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "email", "hyperlink", "linebreak", "smallskip", "medskip", "bigskip", "insertframenumber", "inserttotalframenumber", "textcolor", "colorbox", "footnote", "includegraphics", "lstinputlisting", "frametitle", "framesubtitle", "label", "ref", "pageref", "againframe", "vspace", "hspace", "tableofcontents", "beamerdefaultoverlayspecification", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...NOOP_COMMANDS, ...FORMATS]);
 
 export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceFiles: string[] = [ast.location.file]): SemanticResult {
   const diagnostics: import("./diagnostics.js").Diagnostic[] = [];
@@ -99,6 +99,8 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       case "smallskip": case "medskip": case "bigskip": return [{ type: "container", kind: "vspace", options: { size: node.name === "smallskip" ? "0.5em" : node.name === "medskip" ? "1em" : "1.5em" }, children: [], source: node.location }];
       case "footnote": { const index = footnotes.length + 1; footnotes.push(flow(children())); return [{ type: "format", style: "footnote", children: [{ type: "text", value: String(index), source: node.location }], source: node.location }]; }
       case "label": return [];
+      case "insertframenumber": return [{ type: "format", style: "slidenumber", children: [], source: node.location }];
+      case "inserttotalframenumber": return [{ type: "format", style: "totalframenumber", children: [], source: node.location }];
       case "ref": case "pageref": return [{ type: "format", style: "ref", options: { target: arg() }, children: [{ type: "text", value: arg(), source: node.location }], source: node.location }];
       case "linebreak": return [{ type: "format", style: "linebreak", children: [], source: node.location }];
       case "textcolor": return [{ type: "format", style: "textcolor", options: { color: arg() }, children: children(1), source: node.location }];
@@ -349,19 +351,23 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     presentation.navigation.splice(insertAt, 0, tocSlide);
   }
   const slideNumberById = new Map<string, number>(); presentation.slides.forEach((slide, index) => slideNumberById.set(slide.id, index + 1));
-  const resolveRefs = (nodes: PresentationNode[]) => {
+  const resolveRefs = (nodes: PresentationNode[], slideNumber: number) => {
     for (const node of nodes) {
       if (node.type === "format" && node.style === "ref") {
         const target = typeof node.options?.target === "string" ? node.options.target : "";
         const number = slideNumberById.get(target);
         node.children = [{ type: "text", value: number !== undefined ? String(number) : target, source: node.source }];
-      } else if (node.type === "columns") node.columns.forEach(column => resolveRefs(column.children));
-      else if (node.type === "list") node.items.forEach(item => resolveRefs(item.children));
-      else if (node.type === "component") { resolveRefs(node.children); Object.values(node.slots).forEach(resolveRefs); }
-      else if ("children" in node) resolveRefs(node.children);
+      } else if (node.type === "format" && node.style === "slidenumber") {
+        node.children = [{ type: "text", value: String(slideNumber), source: node.source }];
+      } else if (node.type === "format" && node.style === "totalframenumber") {
+        node.children = [{ type: "text", value: String(presentation.slides.length), source: node.source }];
+      } else if (node.type === "columns") node.columns.forEach(column => resolveRefs(column.children, slideNumber));
+      else if (node.type === "list") node.items.forEach(item => resolveRefs(item.children, slideNumber));
+      else if (node.type === "component") { resolveRefs(node.children, slideNumber); Object.values(node.slots).forEach(slot => resolveRefs(slot, slideNumber)); }
+      else if ("children" in node) resolveRefs(node.children, slideNumber);
     }
   };
-  for (const slide of presentation.slides) { resolveRefs(slide.children); if (slide.title) resolveRefs(slide.title); if (slide.subtitle) resolveRefs(slide.subtitle); if (slide.notes) resolveRefs(slide.notes); }
+  presentation.slides.forEach((slide, index) => { resolveRefs(slide.children, index + 1); if (slide.title) resolveRefs(slide.title, index + 1); if (slide.subtitle) resolveRefs(slide.subtitle, index + 1); if (slide.notes) resolveRefs(slide.notes, index + 1); });
   let transformed = presentation; for (const plugin of config.plugins ?? []) if (plugin.transformIR) transformed = plugin.transformIR(transformed);
   return { presentation: transformed, diagnostics };
 }
