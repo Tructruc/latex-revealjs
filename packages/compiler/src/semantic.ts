@@ -365,7 +365,7 @@ function overlayContent(only: boolean, range: { start: number; end?: number; win
   return [{ type: "fragment", index: range.start > 1 ? range.start - 1 : undefined, start: range.start, end: range.end, windows: range.windows, only, children, source }];
 }
 function textContent(nodes: AstNode[]): string { return nodes.map(n => n.type === "text" ? n.value : "").join(""); }
-function stableSlideId(title: string, index: number): string { const slug = title.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "untitled"; return `slide-${slug}-${index}`; }
+function stableSlideId(title: string | undefined, index: number): string { const slug = (title ?? "").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "untitled"; return `slide-${slug}-${index}`; }
 function flow(nodes: PresentationNode[]): PresentationNode[] {
   const output: PresentationNode[] = []; let inline: PresentationNode[] = [];
   const flush = () => {
