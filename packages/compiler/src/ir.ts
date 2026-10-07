@@ -1,7 +1,7 @@
 import type { SourceLocation } from "./ast.js";
 
 export type PropertyValue = string | number | boolean | null | PropertyValue[] | { [key: string]: PropertyValue };
-export interface PresentationMetadata { title?: string; subtitle?: string; author?: string; institute?: string; date?: string; description?: string }
+export interface PresentationMetadata { title?: string; subtitle?: string; author?: string; institute?: string; date?: string; description?: string; titlegraphic?: string }
 export interface PresentationConfiguration {
   theme?: string; transition?: string; transitionSpeed?: string; controls?: boolean; progress?: boolean; slideNumbers?: boolean;
   reveal?: Record<string, PropertyValue>;
