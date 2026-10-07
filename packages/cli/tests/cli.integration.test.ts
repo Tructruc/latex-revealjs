@@ -5,6 +5,7 @@ import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promise
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { compileTemplate, parse } from "@vue/compiler-sfc";
 import { afterEach, describe, expect, it } from "vitest";
 
 const repositoryRoot = fileURLToPath(new URL("../../..", import.meta.url));
@@ -219,6 +220,16 @@ describe.sequential("RevealTeX CLI integration", () => {
     await writeFile(fixture.source, deck("Gauge", String.raw`\Gauge[value={oops}]`));
 
     await expect(runCli(["build", fixture.source, "--config", fixture.config, "--output", fixture.output])).rejects.toThrow(/RTX3003/);
+  }, 20_000);
+
+  it("builds the showcase into a compilable Vue template", async () => {
+    const output = await mkdtemp(join(tmpdir(), "revealtex-showcase-"));
+    temporaryDirectories.add(output);
+    await runCli(["build", join(repositoryRoot, "examples/showcase/presentation.rtex"), "--config", join(repositoryRoot, "examples/showcase/revealtex.config.ts"), "--renderer", "vue", "--output", output]);
+    const source = await readFile(join(output, "Presentation.generated.vue"), "utf8");
+    const { descriptor } = parse(source);
+    const errors = compileTemplate({ source: descriptor.template!.content, id: "showcase", filename: "Presentation.generated.vue" }).errors;
+    expect(errors).toEqual([]);
   }, 20_000);
 
   it("builds the bundled custom-components example", async () => {
