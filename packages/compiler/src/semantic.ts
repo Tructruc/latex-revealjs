@@ -29,6 +29,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
   let currentSection: { title?: string; slides: SlideIR[]; source: SourceLocation; type: "section" } | undefined;
   let slideNumber = 0;
   let tocRequested = false;
+  let tocFrames = false;
   let overlayCursor = 1;
   let footnotes: PresentationNode[][] = [];
   let defaultIncremental = false;
@@ -279,13 +280,13 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
         continue;
       }
       if (node.name === "section") { beginSection(value, node.location); continue; }
-      if (node.name === "tableofcontents") { tocRequested = true; continue; }
+      if (node.name === "tableofcontents") { tocRequested = true; tocFrames = tocFrames || parseOptions(node.optionalArguments[0]?.raw).frames === true; continue; }
       if (node.name === "beamerdefaultoverlayspecification") { defaultIncremental = (value ?? "").includes("+"); continue; }
       compileCommand(node);
     } else if (node.type === "environment" && node.name === "document") {
       for (const child of node.children) {
         if (child.type === "command" && child.name === "section") { beginSection(child.requiredArguments[0]?.raw.trim(), child.location); continue; }
-        if (child.type === "command" && child.name === "tableofcontents") { tocRequested = true; continue; }
+        if (child.type === "command" && child.name === "tableofcontents") { tocRequested = true; tocFrames = tocFrames || parseOptions(child.optionalArguments[0]?.raw).frames === true; continue; }
         if (child.type === "command" && child.name === "beamerdefaultoverlayspecification") { defaultIncremental = (child.requiredArguments[0]?.raw ?? "").includes("+"); continue; }
         if (child.type === "command" && child.name === "reveal") { presentation.configuration.reveal = { ...(presentation.configuration.reveal ?? {}), ...parseOptions(child.optionalArguments[0]?.raw ?? child.requiredArguments[0]?.raw) }; continue; }
         if (child.type === "command" && child.name === "againframe") {
@@ -318,7 +319,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
   }
   if (tocRequested) {
     const loc = ast.location; const entries: { id: string; title: string }[] = [];
-    if (presentation.sections.length) {
+    if (!tocFrames && presentation.sections.length) {
       for (const section of presentation.sections) { const first = section.slides[0]; if (section.title && first) entries.push({ id: first.id, title: section.title }); }
     } else {
       for (const slide of presentation.slides) {
