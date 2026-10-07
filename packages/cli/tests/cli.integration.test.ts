@@ -183,6 +183,20 @@ describe.sequential("RevealTeX CLI integration", () => {
     await expectMissing(replacementPath);
   }, 20_000);
 
+  it("loads sidecar component metadata", async () => {
+    const fixture = await createFixture("metadata");
+    const components = join(fixture.root, "components");
+    await mkdir(components, { recursive: true });
+    await writeFile(join(components, "Panel.vue"), `<template><div class="panel">Panel</div></template>\n`);
+    await writeFile(join(components, "Panel.meta.json"), JSON.stringify({ portability: "portable", semanticFallback: { tag: "article", class: "panel-fallback" } }));
+    await writeFile(fixture.config, `export default { renderer: "html", components: { autoDiscover: "./components" } };\n`);
+    await writeFile(fixture.source, deck("Panel", String.raw`\Panel[]`));
+
+    await runCli(["build", fixture.source, "--config", fixture.config, "--output", fixture.output]);
+    const html = await readFile(join(fixture.output, "index.html"), "utf8");
+    expect(html).toContain('class="rt-component rt-Panel panel-fallback"');
+  }, 20_000);
+
   it("discovers components in nested directories", async () => {
     const fixture = await createFixture("nested-discovery");
     const nested = join(fixture.root, "components", "widgets");

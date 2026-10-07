@@ -95,6 +95,25 @@ async function main(): Promise<void> {
   }
 }
 
+async function loadComponentMetadata(vuePath: string): Promise<Record<string, unknown> | undefined> {
+  const base = vuePath.replace(/\.vue$/, "");
+  for (const extension of [".meta.ts", ".meta.mjs", ".meta.js", ".meta.json"]) {
+    const candidate = base + extension;
+    try { await access(candidate); } catch { continue; }
+    if (extension === ".meta.json") return JSON.parse(await readFile(candidate, "utf8")) as Record<string, unknown>;
+    if (extension === ".meta.ts") {
+      const source = await readFile(candidate, "utf8");
+      const output = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
+      const temporary = candidate.replace(/\.ts$/, `.${process.pid}.mjs`);
+      await writeFile(temporary, output);
+      try { return ((await import(pathToFileURL(temporary).href)) as { default?: Record<string, unknown> }).default; }
+      finally { await unlink(temporary).catch(() => undefined); }
+    }
+    return ((await import(pathToFileURL(candidate).href)) as { default?: Record<string, unknown> }).default;
+  }
+  return undefined;
+}
+
 async function collectVueFiles(directory: string): Promise<string[]> {
   const files: string[] = [];
   let entries;
@@ -152,10 +171,14 @@ async function loadConfig(file: string | undefined): Promise<RevealTeXConfig> {
     if (definition.html?.renderer?.startsWith(".")) definition.html.renderer = resolve(dirname(file), definition.html.renderer);
     const vueSource = definition.vue ?? definition.source;
     if (vueSource?.endsWith(".vue")) {
-      try {
-        const introspected = introspectVueProps(await readFile(vueSource, "utf8"));
-        if (Object.keys(introspected).length) definition.props = { ...introspected, ...(definition.props ?? {}) };
-      } catch { /* fall back to no validation */ }
+      let introspected: Record<string, unknown> = {};
+      try { introspected = introspectVueProps(await readFile(vueSource, "utf8")); } catch { /* ignore */ }
+      let metadata: Record<string, unknown> | undefined;
+      try { metadata = await loadComponentMetadata(vueSource); } catch { /* ignore */ }
+      const target = definition as Record<string, unknown>;
+      const combined = { ...introspected, ...(metadata?.props as Record<string, unknown> ?? {}), ...((target.props as Record<string, unknown>) ?? {}) };
+      if (Object.keys(combined).length) target.props = combined;
+      for (const [key, value] of Object.entries(metadata ?? {})) if (key !== "props" && target[key] === undefined) target[key] = value;
     }
   }
   for (const group of [config.layouts, ...(config.plugins ?? []).map(plugin => plugin.layouts)]) {

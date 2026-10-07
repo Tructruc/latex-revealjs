@@ -155,7 +155,7 @@ export default defineConfig({
 });
 ```
 
-The `props` schema is optional: the CLI reads each component's `.vue` source and derives it from `defineProps` (type literals, optional flags, string-literal enums, arrays, `withDefaults` defaults, or runtime object declarations), with any explicit config schema taking precedence. Set `components.autoDiscover` to a folder to register every `.vue` file recursively, and `aliases` to expose a component under extra command names:
+The `props` schema is optional: the CLI reads each component's `.vue` source and derives it from `defineProps` (type literals, optional flags, string-literal enums, arrays, `withDefaults` defaults, or runtime object declarations), with any explicit config schema taking precedence. Portability, semantic fallback, and an HTML renderer can also live in a sibling `<Component>.meta.ts`/`.meta.json` file created with `defineComponentMetadata({...})`. Set `components.autoDiscover` to a folder to register every `.vue` file recursively, and `aliases` to expose a component under extra command names:
 
 ```ts
 export default defineConfig({
