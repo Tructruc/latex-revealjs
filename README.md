@@ -120,7 +120,7 @@ Charts use Chart.js (loaded from a CDN) with any Chart.js data object and a `typ
 
 Related vertical slides can carry their own transition with `\begin{section}[transition=convex]{Title}`.
 
-`\titlegraphic{...}` adds an image to the title slide and `\logo{...}` adds one to every slide. Frames accept a `\framesubtitle{...}` and a `\label{...}`; `\ref{label}`/`\pageref{label}` resolve to the referenced slide number. `\tableofcontents` (after `\maketitle`) inserts a linked outline slide built from the document sections. Lists reveal incrementally with `\begin{itemize}[<+->]` (or `[incremental=true]`). Beamer blocks and theorem-like environments map to titled containers: `\begin{block}{Title}...`, plus `alertblock`, `exampleblock`, `theorem`, `lemma`, `corollary`, `proposition`, `definition`, `example`, `proof`, and `remark`.
+`\titlegraphic{...}` adds an image to the title slide and `\logo{...}` adds one to every slide. Common Beamer preamble commands (`\usetheme`, `\usepackage`, `\setbeamertemplate`, `\hypersetup`, ...) are accepted as no-ops so existing decks port easily. Frames accept a `\framesubtitle{...}` and a `\label{...}`; `\ref{label}`/`\pageref{label}` resolve to the referenced slide number. `\tableofcontents` (after `\maketitle`) inserts a linked outline slide built from the document sections. Lists reveal incrementally with `\begin{itemize}[<+->]` (or `[incremental=true]`). Beamer blocks and theorem-like environments map to titled containers: `\begin{block}{Title}...`, plus `alertblock`, `exampleblock`, `theorem`, `lemma`, `corollary`, `proposition`, `definition`, `example`, `proof`, and `remark`.
 
 Tables use LaTeX-style rows and cells, with an optional header row and caption:
 

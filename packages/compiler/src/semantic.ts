@@ -15,7 +15,8 @@ const REVEAL_UTILITY_CONTAINERS: Record<string, string> = { fittext: "fit-text",
 const BLOCK_ENVIRONMENTS = new Set(["block", "alertblock", "exampleblock", "theorem", "lemma", "corollary", "proposition", "definition", "example", "proof", "remark"]);
 const ALIGN_ENVIRONMENTS: Record<string, string> = { center: "align-center", flushleft: "align-left", flushright: "align-right", quote: "quote", quotation: "quote" };
 const OVERLAY_COMMANDS = new Set(["only", "uncover", "visible", "onslide", "alt", "temporal"]);
-const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "titlegraphic", "logo", "theme", "reveal", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "hyperlink", "textcolor", "colorbox", "footnote", "includegraphics", "lstinputlisting", "frametitle", "framesubtitle", "label", "ref", "pageref", "vspace", "hspace", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
+const NOOP_COMMANDS = new Set(["usepackage", "usetheme", "usecolortheme", "usefonttheme", "useinnertheme", "useoutertheme", "setbeamertemplate", "setbeamercolor", "setbeamerfont", "setbeamersize", "beamertemplatenavigationsymbolsempty", "hypersetup", "graphicspath", "bibliographystyle", "setlength"]);
+const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "titlegraphic", "logo", "theme", "reveal", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "hyperlink", "textcolor", "colorbox", "footnote", "includegraphics", "lstinputlisting", "frametitle", "framesubtitle", "label", "ref", "pageref", "vspace", "hspace", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...NOOP_COMMANDS, ...FORMATS]);
 
 export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceFiles: string[] = [ast.location.file]): SemanticResult {
   const diagnostics: import("./diagnostics.js").Diagnostic[] = [];
@@ -56,6 +57,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     const arg = (i = 0) => node.requiredArguments[i]?.raw.trim() ?? "";
     const children = (i = 0) => compile(node.requiredArguments[i]?.children ?? []);
     const options = parseOptions(node.optionalArguments[0]?.raw);
+    if (NOOP_COMMANDS.has(node.name)) return [];
     if (FORMATS.has(node.name)) return [{ type: "format", style: FORMAT_ALIASES[node.name] ?? node.name, children: children(), source: node.location }];
     switch (node.name) {
       case "fragment": {
