@@ -136,7 +136,7 @@ Links compile to real anchors: `\href{https://revealjs.com}{revealjs.com}`, `\ur
 
 Overlay environments are the block forms of the overlay commands: `\begin{onlyenv}<2->`, `visibleenv`, `uncoverenv`, and `onslideenv`. `\beamerdefaultoverlayspecification{<+->}` makes lists incremental by default.
 
-A minimal deck lives in [`examples/minimal`](./examples/minimal).
+Minimal and custom-component examples live in [`examples/minimal`](./examples/minimal) and [`examples/custom-components`](./examples/custom-components).
 
 ## Custom Vue components
 
