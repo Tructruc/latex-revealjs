@@ -82,6 +82,14 @@ x = 1
     expect(html).toContain('<a href="https://example.com"');
   });
 
+  it("emits background video attributes", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}[background-video=bg.mp4,background-video-muted,background-video-loop,background-size=cover]{V}V\end{frame}\end{document}`);
+    expect(html).toContain('data-background-video="bg.mp4"');
+    expect(html).toContain("data-background-video-muted");
+    expect(html).toContain("data-background-video-loop");
+    expect(html).toContain('data-background-size="cover"');
+  });
+
   it("renders description lists", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{D}\begin{description}\item[Term] Meaning\end{description}\end{frame}\end{document}`);
     expect(html).toContain('<dl class="rt-description">');
