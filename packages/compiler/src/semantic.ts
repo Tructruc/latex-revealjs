@@ -213,10 +213,10 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     return makeComponent(definition.component, props, preserveChildren ? context.children : [], context.source);
   };
 
-  const beginSection = (title: string | undefined, location: SourceLocation) => {
+  const beginSection = (title: string | undefined, location: SourceLocation, label?: string) => {
     currentSection = { type: "section", title, slides: [], source: location }; presentation.sections.push(currentSection);
     if (config.sections?.autoDividerSlides && title) {
-      slideNumber++; const divider: SlideIR = { type: "slide", id: stableSlideId(`section-${title}`, slideNumber), title: [{ type: "text", value: title, source: location }], center: true, options: { sectionDivider: true }, attributes: {}, children: [], source: location };
+      slideNumber++; const divider: SlideIR = { type: "slide", id: label ?? stableSlideId(`section-${title}`, slideNumber), title: [{ type: "text", value: title, source: location }], center: true, options: { sectionDivider: true }, attributes: {}, children: [], source: location };
       presentation.slides.push(divider); presentation.navigation.push(divider); currentSection.slides.push(divider);
     }
   };
@@ -300,13 +300,13 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
         else presentation.configuration.slideNumbers = enabled;
         continue;
       }
-      if (node.name === "section") { beginSection(value, node.location); continue; }
+      if (node.name === "section") { beginSection(value, node.location, stringOption(parseOptions(node.optionalArguments[0]?.raw).label)); continue; }
       if (node.name === "tableofcontents") { tocRequested = true; tocFrames = tocFrames || parseOptions(node.optionalArguments[0]?.raw).frames === true; continue; }
       if (node.name === "beamerdefaultoverlayspecification") { defaultIncremental = (value ?? "").includes("+"); continue; }
       compileCommand(node);
     } else if (node.type === "environment" && node.name === "document") {
       for (const child of node.children) {
-        if (child.type === "command" && child.name === "section") { beginSection(child.requiredArguments[0]?.raw.trim(), child.location); continue; }
+        if (child.type === "command" && child.name === "section") { beginSection(child.requiredArguments[0]?.raw.trim(), child.location, stringOption(parseOptions(child.optionalArguments[0]?.raw).label)); continue; }
         if (child.type === "command" && child.name === "tableofcontents") { tocRequested = true; tocFrames = tocFrames || parseOptions(child.optionalArguments[0]?.raw).frames === true; continue; }
         if (child.type === "command" && child.name === "beamerdefaultoverlayspecification") { defaultIncremental = (child.requiredArguments[0]?.raw ?? "").includes("+"); continue; }
         if (child.type === "command" && child.name === "reveal") { presentation.configuration.reveal = { ...(presentation.configuration.reveal ?? {}), ...parseOptions(child.optionalArguments[0]?.raw ?? child.requiredArguments[0]?.raw) }; continue; }
