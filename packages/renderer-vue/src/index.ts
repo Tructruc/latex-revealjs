@@ -118,7 +118,7 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
     case "column": return `<div class="rt-column"${node.width ? ` style=${quote(`flex-basis:${columnWidth(node.width)}`)}` : ""}>${renderNodes(node.children, state)}</div>`;
     case "image": return `<figure><img ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["alt"])}${mediaPresentationAttrs(node.options)} />${node.options.caption ? `<figcaption>${escapeHtml(String(node.options.caption))}</figcaption>` : ""}</figure>`;
     case "svg": return `<img ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["alt"])}${mediaPresentationAttrs(node.options, "rt-svg")} />`;
-    case "video": return `<video ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["autoplay", "muted", "loop", "controls"])}${mediaPresentationAttrs(node.options)}></video>`;
+    case "video": return `<video ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["autoplay", "muted", "loop", "controls", "poster"])}${mediaPresentationAttrs(node.options)}></video>`;
     case "code": { const binding = node.src ? state.codeBindings.get(`${node.source.file}\0${node.src}`) : undefined; return `<RevealCode ${binding ? `:code="${binding}"` : `:code=${quoteBinding(node.code)}`}${node.language ? ` language=${quote(node.language)}` : ""}${attrs(node.options, ["numbers", "highlight"])} />`; }
     case "diagram": {
       if (node.kind === "chart") return `<Chart type=${quote(typeof node.options?.type === "string" ? node.options.type : "bar")} :config=${quoteBinding(node.code)} />`;

@@ -82,6 +82,18 @@ x = 1
     expect(html).toContain('<a href="https://example.com"');
   });
 
+  it("includes search and zoom plugins", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
+    expect(html).toContain("plugin/search/search.esm.js");
+    expect(html).toContain("plugin/zoom/zoom.esm.js");
+  });
+
+  it("renders video posters and controls", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{V}\video[poster=thumb.jpg,controls]{clip.mp4}\end{frame}\end{document}`);
+    expect(html).toContain("<video ");
+    expect(html).toContain('poster="thumb.jpg"');
+  });
+
   it("applies built-in RevealTeX theme classes", async () => {
     const html = await render(String.raw`\theme{ocean}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
     expect(html).toContain('class="reveal rt-theme-ocean"');
