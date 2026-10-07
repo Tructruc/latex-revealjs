@@ -168,7 +168,8 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
         if (child.type === "command" && child.name === "item") { flush(); itemCommand = child; }
         else if (itemCommand || child.type !== "text" || child.value.trim()) current.push(child);
       }
-      flush(); return [{ type: "list", ordered: node.name === "enumerate", description: isDescription || undefined, items, source: node.location }];
+      flush(); const list: PresentationNode = { type: "list", ordered: node.name === "enumerate", description: isDescription || undefined, items, source: node.location };
+      return node.overlay ? overlayContent(false, resolveOverlay(node.overlay), [list], node.location) : [list];
     }
     if (node.name === "steps") {
       return compile(node.children).filter(n => !(n.type === "text" && !n.value.trim())).map((n, i) => ({ type: "fragment", index: i + 1, children: [n], source: n.source }));
