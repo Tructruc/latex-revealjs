@@ -107,6 +107,11 @@ A-->B
     expect(vue).toContain("A<br>B");
   });
 
+  it("omits the logo on plain frames", () => {
+    const vue = generate(String.raw`\logo{a.png}\begin{document}\begin{frame}[plain]{A}A\end{frame}\begin{frame}{B}B\end{frame}\end{document}`);
+    expect((vue.match(/class="rt-logo"/g) ?? []).length).toBe(1);
+  });
+
   it("renders a logo on slides", () => {
     const vue = generate(String.raw`\logo{assets/logo.svg}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
     expect(vue).toContain('class="rt-logo"');

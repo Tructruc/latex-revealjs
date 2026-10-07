@@ -78,7 +78,7 @@ function renderSlide(slide: SlideIR, state: VueRenderState): string {
   if (typeof slide.options.style === "string") attrs.push(`style=${quote(slide.options.style)}`);
   const title = slide.title?.length ? `<h2>${renderNodes(slide.title, state)}</h2>` : "";
   const subtitle = slide.subtitle?.length ? `<h3 class="rt-frame-subtitle">${renderNodes(slide.subtitle, state)}</h3>` : "";
-  const logo = state.logo ? `<img class="rt-logo" ${assetAttribute("src", state.logo.src, state.logo.file, state.assetBindings)} />` : "";
+  const logo = state.logo && slide.options.plain !== true ? `<img class="rt-logo" ${assetAttribute("src", state.logo.src, state.logo.file, state.assetBindings)} />` : "";
   const content = `${subtitle}${renderNodes(slide.children, state)}${logo}${slide.notes?.length ? `<RevealNotes>${renderNodes(slide.notes, state)}</RevealNotes>` : ""}`;
   if (slide.layout) return `<RevealSlide ${attrs.join(" ")}>\n${indent(title, 2)}\n  <${safeName(slide.layout)}>${content}</${safeName(slide.layout)}>\n</RevealSlide>`;
   return `<RevealSlide ${attrs.join(" ")}>\n${indent(`${title}${content}`, 2)}\n</RevealSlide>`;
