@@ -59,6 +59,11 @@ describe("HTML renderer reveal features", () => {
     expect(html).toContain("Note text");
   });
 
+  it("supports code first-number", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{C}\begin{code}[numbers=true,firstnumber=5]a\end{code}\end{frame}\end{document}`);
+    expect(html).toContain('data-ln-start-from="5"');
+  });
+
   it("renders markdown to html", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{M}\begin{markdown}
 # Hello

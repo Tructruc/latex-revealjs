@@ -72,6 +72,11 @@ A-->B
     expect(vue).toContain("<dt>Term</dt>");
   });
 
+  it("supports code first-number", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{C}\begin{code}[numbers=true,firstnumber=5]a\end{code}\end{frame}\end{document}`);
+    expect(vue).toContain(":start='5'");
+  });
+
   it("imports external code files with ?raw", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{L}\lstinputlisting[language=ts]{src/app.ts}\end{frame}\end{document}`);
     expect(vue).toContain('from "/talk/src/app.ts?raw"');
