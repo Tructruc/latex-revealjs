@@ -7,7 +7,7 @@ export interface ComponentDefinition {
   source?: string; vue?: string; lazy?: boolean; portability?: "portable" | "vue-only" | "renderer-specific";
   props?: Record<string, PropSchema>; html?: { renderer?: string }; semanticFallback?: { tag: string; class?: string };
 }
-export interface LayoutDefinition { source: string }
+export interface LayoutDefinition { source: string; html?: { renderer?: string }; semanticFallback?: { tag?: string; class?: string } }
 export interface PluginCommandContext { name: string; options: Record<string, PropertyValue>; argument?: string; arguments: string[]; children: PresentationNode[]; source: SourceLocation }
 export interface PluginCommandDefinition {
   component: string;

@@ -231,7 +231,10 @@ async function loadConfig(file: string | undefined): Promise<RevealTeXConfig> {
     }
   }
   for (const group of [config.layouts, ...(config.plugins ?? []).map(plugin => plugin.layouts)]) {
-    for (const layout of Object.values(group ?? {})) if (layout.source.startsWith(".")) layout.source = resolve(dirname(file), layout.source);
+    for (const layout of Object.values(group ?? {})) {
+      if (layout.source.startsWith(".")) layout.source = resolve(dirname(file), layout.source);
+      if (layout.html?.renderer?.startsWith(".")) layout.html.renderer = resolve(dirname(file), layout.html.renderer);
+    }
   }
   return config;
 }

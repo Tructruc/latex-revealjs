@@ -1,6 +1,9 @@
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { compile } from "@revealtex/compiler";
 import { HtmlRenderer } from "../src/index.js";
+
+const layoutRendererPath = fileURLToPath(new URL("./fixtures/layout-renderer.ts", import.meta.url));
 
 async function render(source: string, config = {}) {
   const { presentation } = compile(source, { file: "/talk/deck.rtex", config });
@@ -26,6 +29,14 @@ describe("HTML renderer reveal features", () => {
     expect(html).toContain('data-rt-overlay-start="1"');
     expect(html).toContain('data-rt-overlay-end="2"');
     expect(html).toContain('class="rt-overlay fragment"');
+  });
+
+  it("uses layout HTML renderer modules", async () => {
+    const config = { layouts: { HeroSplit: { source: "x.vue", html: { renderer: layoutRendererPath } } } };
+    const html = await render(String.raw`\begin{document}\begin{frame}[layout=HeroSplit]{X}\slot{left}{L}\slot{right}{R}\end{frame}\end{document}`, config);
+    expect(html).toContain('class="hero-split"');
+    expect(html).toContain('<div class="hero-left">');
+    expect(html).toContain("<p>R</p>");
   });
 
   it("wraps layout slides and renders slots in HTML", async () => {
