@@ -145,7 +145,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       return [{ type: "math", display: node.name !== "math", tex, source: node.location }];
     }
     if (node.name === "code") return [{ type: "code", code: (node.raw ?? textContent(node.children)).trim(), language: stringOption(options.language), options, source: node.location }];
-    if (node.name === "verbatim") return [{ type: "code", code: rawCode(node.raw ?? ""), options, source: node.location }];
+    if (node.name === "verbatim" || node.name === "semiverbatim") return [{ type: "code", code: rawCode(node.raw ?? ""), options, source: node.location }];
     if (node.name === "lstlisting") return [{ type: "code", code: rawCode(node.raw ?? ""), language: stringOption(options.language), options, source: node.location }];
     if (node.name === "itemize" || node.name === "enumerate" || node.name === "description") {
       const isDescription = node.name === "description";
