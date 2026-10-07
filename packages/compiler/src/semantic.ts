@@ -101,7 +101,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       case "smallskip": case "medskip": case "bigskip": return [{ type: "container", kind: "vspace", options: { size: node.name === "smallskip" ? "0.5em" : node.name === "medskip" ? "1em" : "1.5em" }, children: [], source: node.location }];
       case "footnote": { const index = footnotes.length + 1; footnotes.push(flow(children())); return [{ type: "format", style: "footnote", children: [{ type: "text", value: String(index), source: node.location }], source: node.location }]; }
       case "label": return [];
-      case "caption": return [{ type: "container", kind: "caption", children: flow(children()), source: node.location }];
+      case "caption": return [{ type: "container", kind: "caption", options: {}, children: flow(children()), source: node.location }];
       case "insertframenumber": return [{ type: "format", style: "slidenumber", children: [], source: node.location }];
       case "inserttotalframenumber": return [{ type: "format", style: "totalframenumber", children: [], source: node.location }];
       case "ref": case "pageref": return [{ type: "format", style: "ref", options: { target: arg() }, children: [{ type: "text", value: arg(), source: node.location }], source: node.location }];
