@@ -101,7 +101,10 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
       return `<div class=${quote(classes)}${overlayDataAttrs(node)}>${renderNodes(node.children, state)}</div>`;
     }
     case "animation": return `<RevealFragment effect=${quote(node.effect)}${animationStyle(node)}>${renderNodes(node.children, state)}</RevealFragment>`;
-    case "list": return `<${node.ordered ? "ol" : "ul"}>${node.items.map(item => renderNode(item, state)).join("")}</${node.ordered ? "ol" : "ul"}>`;
+    case "list": {
+      if (node.description) return `<dl class="rt-description">${node.items.map(item => `<dt>${escapeHtml(item.label ?? "")}</dt>${describeItem(item, state)}`).join("")}</dl>`;
+      return `<${node.ordered ? "ol" : "ul"}>${node.items.map(item => renderNode(item, state)).join("")}</${node.ordered ? "ol" : "ul"}>`;
+    }
     case "list-item": {
       if (node.index === undefined && node.start === undefined && node.end === undefined) return `<li>${renderNodes(node.children, state)}</li>`;
       const classes = ["rt-overlay", node.index !== undefined && "fragment", node.only && "rt-only"].filter(Boolean).join(" ");
@@ -138,6 +141,13 @@ function renderTable(node: Extract<PresentationNode, { type: "table" }>): string
   const thead = head ? `<thead><tr>${head.map(cell => `<th>${escapeHtml(cell)}</th>`).join("")}</tr></thead>` : "";
   const tbody = `<tbody>${body.map(row => `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody>`;
   return `<table class="rt-table">${caption}${thead}${tbody}</table>`;
+}
+function describeItem(item: Extract<PresentationNode, { type: "list-item" }>, state: VueRenderState): string {
+  const content = renderNodes(item.children, state);
+  if (item.index === undefined && item.start === undefined && item.end === undefined && item.windows === undefined) return `<dd>${content}</dd>`;
+  const classes = ["rt-overlay", item.index !== undefined && "fragment", item.only && "rt-only"].filter(Boolean).join(" ");
+  const indexAttr = item.index !== undefined ? ` data-fragment-index=${quote(String(item.index))}` : "";
+  return `<dd class=${quote(classes)}${indexAttr}${overlayDataAttrs(item)}>${content}</dd>`;
 }
 function overlayDataAttrs(node: { index?: number; start?: number; end?: number; windows?: { start: number; end?: number }[] }): string {
   const parts: string[] = [];

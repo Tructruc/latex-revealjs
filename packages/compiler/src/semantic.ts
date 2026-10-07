@@ -134,7 +134,8 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     if (node.name === "code") return [{ type: "code", code: (node.raw ?? textContent(node.children)).trim(), language: stringOption(options.language), options, source: node.location }];
     if (node.name === "verbatim") return [{ type: "code", code: rawCode(node.raw ?? ""), options: {}, source: node.location }];
     if (node.name === "lstlisting") return [{ type: "code", code: rawCode(node.raw ?? ""), language: stringOption(options.language), options, source: node.location }];
-    if (node.name === "itemize" || node.name === "enumerate") {
+    if (node.name === "itemize" || node.name === "enumerate" || node.name === "description") {
+      const isDescription = node.name === "description";
       const items: ListItemIR[] = []; let current: AstNode[] = [];
       let itemCommand: CommandNode | undefined;
       const incremental = options.incremental === true || options["<+->"] === true || options.overlay === "<+->";
@@ -145,7 +146,8 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
           let index = overlay && overlay.start > 1 ? overlay.start - 1 : undefined;
           let start = overlay?.start;
           if (!overlay && incremental) { incrementalIndex++; index = incrementalIndex; start = incrementalIndex + 1; }
-          items.push({ type: "list-item", index, start, end: overlay?.end, windows: overlay?.windows, children: flow(compile(current)), source: itemCommand.location });
+          const label = isDescription ? itemCommand.optionalArguments[0]?.raw.trim() : undefined;
+          items.push({ type: "list-item", label, index, start, end: overlay?.end, windows: overlay?.windows, children: flow(compile(current)), source: itemCommand.location });
         }
         current = [];
       };
@@ -153,7 +155,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
         if (child.type === "command" && child.name === "item") { flush(); itemCommand = child; }
         else if (itemCommand || child.type !== "text" || child.value.trim()) current.push(child);
       }
-      flush(); return [{ type: "list", ordered: node.name === "enumerate", items, source: node.location }];
+      flush(); return [{ type: "list", ordered: node.name === "enumerate", description: isDescription || undefined, items, source: node.location }];
     }
     if (node.name === "steps") {
       return compile(node.children).filter(n => !(n.type === "text" && !n.value.trim())).map((n, i) => ({ type: "fragment", index: i + 1, children: [n], source: n.source }));

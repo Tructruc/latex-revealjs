@@ -82,6 +82,12 @@ x = 1
     expect(html).toContain('<a href="https://example.com"');
   });
 
+  it("renders description lists", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{D}\begin{description}\item[Term] Meaning\end{description}\end{frame}\end{document}`);
+    expect(html).toContain('<dl class="rt-description">');
+    expect(html).toContain("<dt>Term</dt>");
+  });
+
   it("renders a logo on slides", async () => {
     const html = await render(String.raw`\logo{assets/logo.svg}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
     expect(html).toContain('<img class="rt-logo"');

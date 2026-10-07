@@ -30,6 +30,12 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain(":index='1'");
   });
 
+  it("renders description lists", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{D}\begin{description}\item[Term] Meaning\end{description}\end{frame}\end{document}`);
+    expect(vue).toContain('<dl class="rt-description">');
+    expect(vue).toContain("<dt>Term</dt>");
+  });
+
   it("imports external code files with ?raw", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{L}\lstinputlisting[language=ts]{src/app.ts}\end{frame}\end{document}`);
     expect(vue).toContain('from "/talk/src/app.ts?raw"');
