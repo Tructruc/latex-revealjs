@@ -30,6 +30,36 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain(":index='1'");
   });
 
+  it("generates a template that compiles for a feature-rich deck", () => {
+    const config = {};
+    const { presentation } = compile(String.raw`\theme{dracula}\reveal{autoAnimate=true}
+\begin{document}\maketitle
+\begin{frame}[state=x,background-image=bg.jpg,autoanimate]{Slides}
+\only<2->{Two}
+\begin{itemize}\item<1-> A\item<2-> B\end{itemize}
+\begin{table}[header=true]H1 & H2 \\ a & b \\ \end{table}
+\begin{block}{Title}Body\end{block}
+\begin{description}\item[Term] Def\end{description}
+Text\footnote{Note}
+\begin{markdown}
+# Hi
+
+$x^2$
+\end{markdown}
+\begin{chart}[type=bar]{"labels":["A"],"datasets":[{"data":[1]}]}\end{chart}
+\begin{mermaid}graph LR
+A-->B
+\end{mermaid}
+\end{frame}\end{document}`, { file: "/talk/deck.rtex", config });
+    const vue = renderVue(presentation, config, "/talk/deck.rtex");
+    const { descriptor } = parse(vue);
+    const errors = compileTemplate({ source: descriptor.template!.content, id: "feature-rich", filename: "Presentation.generated.vue" }).errors;
+    expect(errors).toEqual([]);
+    expect(vue).toContain("rt-table");
+    expect(vue).toContain('class="rt-block"');
+    expect(vue).toContain("rt-footnote-ref");
+  });
+
   it("renders description lists", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{D}\begin{description}\item[Term] Meaning\end{description}\end{frame}\end{document}`);
     expect(vue).toContain('<dl class="rt-description">');
