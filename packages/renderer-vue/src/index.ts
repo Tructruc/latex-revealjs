@@ -90,6 +90,7 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
     case "paragraph": return `<p>${renderNodes(node.children, state)}</p>`;
     case "math": return `<RevealMath ${node.display ? "display " : ""}:tex=${quoteBinding(node.tex)} />`;
     case "format": {
+      if (node.style === "linebreak") return "<br>";
       const color = typeof node.options?.color === "string" ? node.options.color : undefined;
       if (node.style === "footnote") return `<sup class="rt-footnote-ref">${renderNodes(node.children, state)}</sup>`;
       if (node.style === "footnote-marker") return `<sup class="rt-footnote-marker">${renderNodes(node.children, state)}</sup>`;

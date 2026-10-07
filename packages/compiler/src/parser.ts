@@ -49,6 +49,7 @@ export class Parser {
   private parseCommandOrEnvironment(): AstNode | undefined {
     const start = this.position();
     this.expect("\\");
+    if (this.peek() === "\\") { this.advance(); return { type: "command", name: "linebreak", optionalArguments: [], requiredArguments: [], location: this.location(start) }; }
     if (!/[A-Za-z@]/.test(this.peek())) {
       const escaped = this.advance();
       return { type: "text", value: escaped, location: this.location(start) };

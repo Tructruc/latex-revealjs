@@ -85,6 +85,11 @@ A-->B
     expect(vue).toContain("transform:rotate(90deg) scale(1.5)");
   });
 
+  it("renders text line breaks", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{A\\B}C\end{frame}\end{document}`);
+    expect(vue).toContain("A<br>B");
+  });
+
   it("renders a logo on slides", () => {
     const vue = generate(String.raw`\logo{assets/logo.svg}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
     expect(vue).toContain('class="rt-logo"');
