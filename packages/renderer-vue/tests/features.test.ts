@@ -84,9 +84,10 @@ A-->B
   });
 
   it("applies media width, height, and class options", () => {
-    const vue = generate(String.raw`\begin{document}\begin{frame}{I}\image[width=50%,height=10em,class=hero,angle=90,scale=1.5]{a.png}\end{frame}\end{document}`);
+    const vue = generate(String.raw`\begin{document}\begin{frame}{I}\image[width=50%,height=10em,class=hero,angle=90,scale=1.5,keepaspectratio]{a.png}\end{frame}\end{document}`);
     expect(vue).toContain("width:50%;height:10em");
     expect(vue).toContain("hero");
+    expect(vue).toContain("rt-media--contain");
     expect(vue).toContain("transform:rotate(90deg) scale(1.5)");
   });
 
