@@ -54,6 +54,7 @@ export class Parser {
       return { type: "text", value: escaped, location: this.location(start) };
     }
     const name = this.readWhile(/[A-Za-z@]/);
+    if (this.peek() === "*") this.advance();
     if (name === "begin") return this.parseEnvironment(start);
     if (name === "end") this.fail("RTX1002", "Unexpected \\end without a matching \\begin.", start);
     const command: CommandNode = { type: "command", name, optionalArguments: [], requiredArguments: [], location: this.location(start) };
