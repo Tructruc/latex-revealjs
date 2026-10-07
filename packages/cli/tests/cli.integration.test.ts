@@ -221,6 +221,18 @@ describe.sequential("RevealTeX CLI integration", () => {
     await expect(runCli(["build", fixture.source, "--config", fixture.config, "--output", fixture.output])).rejects.toThrow(/RTX3003/);
   }, 20_000);
 
+  it("scaffolds a starter project with init", async () => {
+    const root = await mkdtemp(join(tmpdir(), "revealtex-init-"));
+    temporaryDirectories.add(root);
+
+    await runCli(["init", root]);
+    for (const file of ["presentation.rtex", "revealtex.config.ts", "src/components/Metric.vue"]) {
+      await expect(access(join(root, file))).resolves.toBeUndefined();
+    }
+    const source = await readFile(join(root, "presentation.rtex"), "utf8");
+    expect(source).toContain("\\Metric[value=94.7");
+  }, 20_000);
+
   it("prints its version", async () => {
     const result = await runCli(["--version"]);
     expect(result.stdout).toMatch(/revealtex \d+\.\d+\.\d+/);

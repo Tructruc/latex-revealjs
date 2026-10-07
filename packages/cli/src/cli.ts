@@ -32,6 +32,12 @@ async function main(): Promise<void> {
     process.stdout.write(`revealtex ${pkg.version ?? "0.0.0"}\n`);
     return;
   }
+  if (command === "init") {
+    const target = resolve(sourceArg ?? ".");
+    await initProject(target);
+    process.stdout.write(`RevealTeX: created a starter project in ${target}.\n`);
+    return;
+  }
   if (command === "help" || command === "--help" || !sourceArg) { usage(); return; }
   if (!["build", "watch", "dev", "create"].includes(command)) throw new Error(`Unknown command "${command}".`);
 
@@ -117,6 +123,44 @@ async function loadComponentMetadata(vuePath: string): Promise<Record<string, un
     return ((await import(pathToFileURL(candidate).href)) as { default?: Record<string, unknown> }).default;
   }
   return undefined;
+}
+
+async function initProject(target: string): Promise<void> {
+  const files: Record<string, string> = {
+    "presentation.rtex": `\\documentclass{reveal}
+\\title{My Presentation}
+\\author{You}
+\\date{\\today}
+\\begin{document}
+\\maketitle
+\\begin{frame}{Hello}
+Welcome to RevealTeX.
+\\begin{itemize}
+\\item<1-> Author in LaTeX
+\\item<2-> Present in reveal.js
+\\end{itemize}
+\\Metric[value=94.7,label={Accuracy}]
+\\end{frame}
+\\end{document}
+`,
+    "revealtex.config.ts": `import { defineConfig } from "revealtex";
+export default defineConfig({
+  components: { autoDiscover: "./src/components" }
+});
+`,
+    "src/components/Metric.vue": `<script setup lang="ts">
+defineProps<{ value: number; label: string }>();
+</script>
+<template><div class="metric"><strong>{{ value }}</strong><span>{{ label }}</span></div></template>
+<style scoped>.metric{display:grid;gap:.2em;text-align:center}.metric strong{font-size:2em;color:#8b5cf6}.metric span{color:#94a3b8}</style>
+`
+  };
+  for (const [relative, content] of Object.entries(files)) {
+    const file = join(target, relative);
+    try { await access(file); continue; } catch { /* create when missing */ }
+    await mkdir(dirname(file), { recursive: true });
+    await writeFile(file, content);
+  }
 }
 
 async function collectVueFiles(directory: string): Promise<string[]> {
@@ -510,6 +554,7 @@ function usage(): void {
     "  revealtex <command> <file.rtex> [options]",
     "",
     "Commands:",
+    "  init      Create a starter project in a directory",
     "  dev       Compile, watch, and serve with Vite",
     "  watch     Compile and rebuild on changes",
     "  build     Compile once",

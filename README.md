@@ -9,12 +9,13 @@ RevealTeX compiles a concise LaTeX-inspired `.rtex` language into readable Vue 3
 ```bash
 npm install
 npm run build
-node packages/cli/dist/cli.js dev examples/showcase/presentation.rtex \
-  --config examples/showcase/revealtex.config.ts \
-  --output .revealtex/showcase
+node packages/cli/dist/cli.js init my-talk
+node packages/cli/dist/cli.js dev my-talk/presentation.rtex \
+  --config my-talk/revealtex.config.ts \
+  --output .revealtex/my-talk
 ```
 
-Open the printed localhost URL. `dev` launches Vite, watches the complete `.rtex` include graph and configuration, and sends generated Vue updates through HMR. For an existing Vue application, use `revealtex build presentation.rtex --output src/generated`, or `watch` to rebuild without starting another server.
+`init` writes a starter `presentation.rtex`, `revealtex.config.ts`, and sample component. Open the printed localhost URL. `dev` launches Vite, watches the complete `.rtex` include graph and configuration, and sends generated Vue updates through HMR. For an existing Vue application, use `revealtex build presentation.rtex --output src/generated`, or `watch` to rebuild without starting another server. A full showcase lives in [`examples/showcase`](./examples/showcase).
 
 ## Language
 
