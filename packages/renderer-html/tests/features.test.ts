@@ -110,6 +110,12 @@ x = 1
     expect(html).toContain('class="reveal rt-theme-ocean"');
   });
 
+  it("emits element data attributes", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{E}\element[id=model,data-state=ready]{X}\end{frame}\end{document}`);
+    expect(html).toContain('data-id="model"');
+    expect(html).toContain('data-state="ready"');
+  });
+
   it("emits background video attributes", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}[background-video=bg.mp4,background-video-muted,background-video-loop,background-size=cover]{V}V\end{frame}\end{document}`);
     expect(html).toContain('data-background-video="bg.mp4"');
