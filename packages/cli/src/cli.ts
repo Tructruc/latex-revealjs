@@ -27,6 +27,11 @@ const [command = "help", sourceArg, ...rawArgs] = process.argv.slice(2);
 const flags = parseFlags(rawArgs);
 
 async function main(): Promise<void> {
+  if (command === "--version" || command === "-v" || command === "version") {
+    const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")) as { version?: string };
+    process.stdout.write(`revealtex ${pkg.version ?? "0.0.0"}\n`);
+    return;
+  }
   if (command === "help" || command === "--help" || !sourceArg) { usage(); return; }
   if (!["build", "watch", "dev", "create"].includes(command)) throw new Error(`Unknown command "${command}".`);
 
@@ -498,7 +503,29 @@ function parseFlags(args: string[]): Record<string, string | boolean> {
 }
 
 function usage(): void {
-  process.stdout.write("RevealTeX\n\n  revealtex build <file.rtex> [--renderer vue|html] [--output dir]\n  revealtex watch <file.rtex> [--output dir]\n  revealtex dev <file.rtex> [--output dir] [--host 127.0.0.1] [--port 5173]\n  revealtex create <file.rtex> [--output dir]\n");
+  process.stdout.write([
+    "RevealTeX - LaTeX-inspired presentations for reveal.js",
+    "",
+    "Usage:",
+    "  revealtex <command> <file.rtex> [options]",
+    "",
+    "Commands:",
+    "  dev       Compile, watch, and serve with Vite",
+    "  watch     Compile and rebuild on changes",
+    "  build     Compile once",
+    "  create    Compile and scaffold a standalone Vite project",
+    "  help      Show this message",
+    "",
+    "Options:",
+    "  --config <file>        revealtex.config.ts|.mjs|.js",
+    "  --output <dir>         Output directory",
+    "  --renderer vue|html    Output renderer (default: vue)",
+    "  --standalone           Emit standalone Vite project files",
+    "  --host <host>          Dev server host (dev)",
+    "  --port <port>          Dev server port (dev)",
+    "  --version              Print the version",
+    ""
+  ].join("\n"));
 }
 
 function report(error: unknown): void {

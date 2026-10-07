@@ -221,6 +221,11 @@ describe.sequential("RevealTeX CLI integration", () => {
     await expect(runCli(["build", fixture.source, "--config", fixture.config, "--output", fixture.output])).rejects.toThrow(/RTX3003/);
   }, 20_000);
 
+  it("prints its version", async () => {
+    const result = await runCli(["--version"]);
+    expect(result.stdout).toMatch(/revealtex \d+\.\d+\.\d+/);
+  });
+
   it("scaffolds a standalone project with create", async () => {
     const fixture = await createFixture("create");
     await writeFile(fixture.source, deck("Standalone", "Hello from create."));
