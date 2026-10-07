@@ -85,6 +85,12 @@ A-->B
     expect(vue).toContain("transform:rotate(90deg) scale(1.5)");
   });
 
+  it("supports media loading and title attributes", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{I}\image[alt={A},loading=lazy,title={T}]{a.png}\end{frame}\end{document}`);
+    expect(vue).toContain('loading="lazy"');
+    expect(vue).toContain('title="T"');
+  });
+
   it("emits element data attributes", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{E}\element[id=model,data-state=ready]{X}\end{frame}\end{document}`);
     expect(vue).toContain('data-id="model"');

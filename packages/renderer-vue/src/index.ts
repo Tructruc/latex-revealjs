@@ -119,9 +119,9 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
     }
     case "columns": return `<div class="rt-columns"${columnStyle(node.gap, node.alignment)}>${node.columns.map(column => renderNode(column, state)).join("")}</div>`;
     case "column": { const styles = [node.width ? `flex-basis:${columnWidth(node.width)}` : "", node.align ? `align-self:${columnAlignment(node.align)}` : ""].filter(Boolean).join(";"); return `<div class="rt-column"${styles ? ` style=${quote(styles)}` : ""}>${renderNodes(node.children, state)}</div>`; }
-    case "image": return `<figure><img ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["alt"])}${mediaPresentationAttrs(node.options)} />${node.options.caption ? `<figcaption>${escapeHtml(String(node.options.caption))}</figcaption>` : ""}</figure>`;
-    case "svg": return `<img ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["alt"])}${mediaPresentationAttrs(node.options, "rt-svg")} />`;
-    case "video": return `<video ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["autoplay", "muted", "loop", "controls", "poster"])}${mediaPresentationAttrs(node.options)}></video>`;
+    case "image": return `<figure><img ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["alt", "loading", "title"])}${mediaPresentationAttrs(node.options)} />${node.options.caption ? `<figcaption>${escapeHtml(String(node.options.caption))}</figcaption>` : ""}</figure>`;
+    case "svg": return `<img ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["alt", "loading", "title"])}${mediaPresentationAttrs(node.options, "rt-svg")} />`;
+    case "video": return `<video ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["autoplay", "muted", "loop", "controls", "poster", "preload", "title"])}${mediaPresentationAttrs(node.options)}></video>`;
     case "code": { const binding = node.src ? state.codeBindings.get(`${node.source.file}\0${node.src}`) : undefined; return `<RevealCode ${binding ? `:code="${binding}"` : `:code=${quoteBinding(node.code)}`}${node.language ? ` language=${quote(node.language)}` : ""}${attrs(node.options, ["numbers", "highlight"])} />`; }
     case "diagram": {
       if (node.kind === "chart") return `<Chart type=${quote(typeof node.options?.type === "string" ? node.options.type : "bar")} :config=${quoteBinding(node.code)} />`;
