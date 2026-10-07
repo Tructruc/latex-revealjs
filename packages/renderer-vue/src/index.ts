@@ -92,6 +92,8 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
     case "format": {
       if (node.style === "linebreak") return "<br>";
       const color = typeof node.options?.color === "string" ? node.options.color : undefined;
+      if (node.style === "textsuperscript") return `<sup>${renderNodes(node.children, state)}</sup>`;
+      if (node.style === "textsubscript") return `<sub>${renderNodes(node.children, state)}</sub>`;
       if (node.style === "footnote") return `<sup class="rt-footnote-ref">${renderNodes(node.children, state)}</sup>`;
       if (node.style === "footnote-marker") return `<sup class="rt-footnote-marker">${renderNodes(node.children, state)}</sup>`;
       if (node.style === "textcolor" && color) return `<span class="rt-textcolor" style=${quote(`color:${color}`)}>${renderNodes(node.children, state)}</span>`;
