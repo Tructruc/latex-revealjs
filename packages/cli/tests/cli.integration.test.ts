@@ -183,6 +183,17 @@ describe.sequential("RevealTeX CLI integration", () => {
     await expectMissing(replacementPath);
   }, 20_000);
 
+  it("validates props introspected from auto-discovered components", async () => {
+    const fixture = await createFixture("introspect");
+    const components = join(fixture.root, "components");
+    await mkdir(components, { recursive: true });
+    await writeFile(join(components, "Gauge.vue"), `<script setup lang="ts">defineProps<{ value: number }>()</script><template><div>{{ value }}</div></template>\n`);
+    await writeFile(fixture.config, `export default { renderer: "vue", components: { autoDiscover: "./components" } };\n`);
+    await writeFile(fixture.source, deck("Gauge", String.raw`\Gauge[value={oops}]`));
+
+    await expect(runCli(["build", fixture.source, "--config", fixture.config, "--output", fixture.output])).rejects.toThrow(/RTX3003/);
+  }, 20_000);
+
   it("scaffolds a standalone project with create", async () => {
     const fixture = await createFixture("create");
     await writeFile(fixture.source, deck("Standalone", "Hello from create."));

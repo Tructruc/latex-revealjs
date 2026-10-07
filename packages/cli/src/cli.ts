@@ -11,6 +11,7 @@ import { VueRenderer } from "@revealtex/renderer-vue";
 import { HtmlRenderer } from "@revealtex/renderer-html";
 import { createServer } from "vite";
 import vue from "@vitejs/plugin-vue";
+import { introspectVueProps } from "./introspect.js";
 
 const MANIFEST_FILE = ".revealtex-manifest.json";
 let moduleImportNonce = 0;
@@ -139,6 +140,13 @@ async function loadConfig(file: string | undefined): Promise<RevealTeXConfig> {
     if (definition.source?.startsWith(".")) definition.source = resolve(dirname(file), definition.source);
     if (definition.vue?.startsWith(".")) definition.vue = resolve(dirname(file), definition.vue);
     if (definition.html?.renderer?.startsWith(".")) definition.html.renderer = resolve(dirname(file), definition.html.renderer);
+    const vueSource = definition.vue ?? definition.source;
+    if (vueSource?.endsWith(".vue")) {
+      try {
+        const introspected = introspectVueProps(await readFile(vueSource, "utf8"));
+        if (Object.keys(introspected).length) definition.props = { ...introspected, ...(definition.props ?? {}) };
+      } catch { /* fall back to no validation */ }
+    }
   }
   for (const group of [config.layouts, ...(config.plugins ?? []).map(plugin => plugin.layouts)]) {
     for (const layout of Object.values(group ?? {})) if (layout.source.startsWith(".")) layout.source = resolve(dirname(file), layout.source);
