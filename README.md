@@ -249,9 +249,9 @@ This makes `\score{94.7}` compile to portable `ComponentIR`. Command children ar
 ## Packages
 
 - `@revealtex/compiler`: parser, AST, includes, diagnostics, semantic analysis, and IR
-- `@revealtex/renderer-core`: renderer contract and registry
-- `@revealtex/renderer-vue`: readable Vue source generator
-- `@revealtex/renderer-html`: standalone reveal.js HTML renderer with semantic component fallbacks
+- `@revealtex/renderer-core`: renderer contract, registry, and shared build-time Markdown/KaTeX rendering
+- `@revealtex/renderer-vue`: readable Vue source generator (themes, code highlighting, Mermaid, charts, layouts)
+- `@revealtex/renderer-html`: standalone reveal.js HTML renderer with semantic component and layout fallbacks
 - `@revealtex/runtime-vue`: reveal lifecycle components, context composables, theme, and animations
 - `revealtex`: public configuration API and CLI
 
