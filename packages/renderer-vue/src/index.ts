@@ -109,7 +109,7 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
     case "animation": return `<RevealFragment effect=${quote(node.effect)}${animationStyle(node)}>${renderNodes(node.children, state)}</RevealFragment>`;
     case "list": {
       if (node.description) return `<dl class="rt-description">${node.items.map(item => `<dt>${escapeHtml(item.label ?? "")}</dt>${describeItem(item, state)}`).join("")}</dl>`;
-      return `<${node.ordered ? "ol" : "ul"}>${node.items.map(item => renderNode(item, state)).join("")}</${node.ordered ? "ol" : "ul"}>`;
+      return `<${node.ordered ? "ol" : "ul"}${node.class ? ` class=${quote(node.class)}` : ""}>${node.items.map(item => renderNode(item, state)).join("")}</${node.ordered ? "ol" : "ul"}>`;
     }
     case "list-item": {
       if (node.index === undefined && node.start === undefined && node.end === undefined) return `<li>${renderNodes(node.children, state)}</li>`;

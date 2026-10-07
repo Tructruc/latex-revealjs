@@ -172,7 +172,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
         if (child.type === "command" && child.name === "item") { flush(); itemCommand = child; }
         else if (itemCommand || child.type !== "text" || child.value.trim()) current.push(child);
       }
-      flush(); const list: PresentationNode = { type: "list", ordered: node.name === "enumerate", description: isDescription || undefined, items, source: node.location };
+      flush(); const list: PresentationNode = { type: "list", ordered: node.name === "enumerate", description: isDescription || undefined, class: stringOption(options.class), items, source: node.location };
       return node.overlay ? overlayContent(false, resolveOverlay(node.overlay), [list], node.location) : [list];
     }
     if (node.name === "steps") {
