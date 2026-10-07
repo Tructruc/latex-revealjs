@@ -85,6 +85,11 @@ x = 1
     expect(html).toContain('<div class="rt-container__title">Idea</div>');
   });
 
+  it("renders table row overlays", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{T}\begin{table}[header=true]H1 & H2 \\ \only<2-> a & b \\ \end{table}\end{frame}\end{document}`);
+    expect(html).toContain('data-rt-overlay-windows="2:"');
+  });
+
   it("renders tables and links", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{T}\begin{table}[header=true,caption={Scores}]Name & Score \\ Ada & 42 \\ \end{table}\url{https://example.com}\end{frame}\end{document}`);
     expect(html).toContain('<table class="rt-table">');

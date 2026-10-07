@@ -129,8 +129,11 @@ Tables use LaTeX-style rows and cells, with an optional header row and caption:
 \begin{table}[header=true,caption={Validation metrics}]
 Metric & Value \\
 Accuracy & 94.7% \\
+\only<2-> Latency & 12.4ms \\
 \end{table}
 ```
+
+Rows may start with an overlay (`\only<2->`, `\uncover`, `\visible`, `\onslide`) to reveal them progressively.
 
 Links compile to real anchors: `\href{https://revealjs.com}{revealjs.com}`, `\url{https://revealjs.com}`, `\email{...}`, and `\hyperlink{slide-label}{jump}` for cross-slide navigation. `\begin{description}\item[Term] ...\end{description}` renders a definition list. Inline formatting includes `\textbf`, `\textit`, `\emph`/`\em`, `\texttt`, `\textsf`, `\textsc`, `\underline`, `\alert`, `\structure`, `\small`, `\large`, `\Huge`, `\textsuperscript`, `\textsubscript`, and `\textcolor{...}{...}`; `\includegraphics` is an alias for `\image`. Use `\vspace{}`/`\hspace{}` (or `\bigskip`) for spacing, and `\begin{columns}[align=center]` with `\column[t]{0.5}` for per-column alignment.
 

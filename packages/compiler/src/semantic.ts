@@ -131,7 +131,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     if (node.name === "markdown") return [{ type: "markdown", content: node.raw ?? "", source: node.location }];
     if (BLOCK_ENVIRONMENTS.has(node.name)) { const title = node.requiredArguments[0]?.raw.trim() || stringOption(options.title); return [{ type: "container", kind: node.name, options: { ...options, ...(title ? { title } : {}) }, children: flow(compile(node.children)), source: node.location }]; }
     if (ALIGN_ENVIRONMENTS[node.name]) return [{ type: "container", kind: ALIGN_ENVIRONMENTS[node.name]!, options, children: flow(compile(node.children)), source: node.location }];
-    if (node.name === "table" || node.name === "tabular") return [{ type: "table", rows: parseTable(node.raw ?? ""), header: options.header === true, caption: stringOption(options.caption), options, source: node.location }];
+    if (node.name === "table" || node.name === "tabular") { const parsed = parseTable(node.raw ?? ""); return [{ type: "table", rows: parsed.rows, windows: parsed.windows.some(Boolean) ? parsed.windows : undefined, header: options.header === true, caption: stringOption(options.caption), options, source: node.location }]; }
     if (MATH_ENVIRONMENTS.has(node.name)) {
       const raw = (node.raw ?? "").trim();
       const inner = MATH_INNER_ENVIRONMENTS.has(node.name);
@@ -391,9 +391,21 @@ function padOverlaySteps(nodes: PresentationNode[], source: SourceLocation): voi
   for (let index = 1; index < maxOverlay; index++) if (!indices.has(index)) nodes.push({ type: "fragment", index, children: [], source });
 }
 function rawCode(raw: string): string { return raw.replace(/^\n/, "").replace(/\n[ \t]*$/, ""); }
-function parseTable(raw: string): string[][] {
+function parseTable(raw: string): { rows: string[][]; windows: (OverlayWindow[] | undefined)[] } {
   const cleaned = raw.replace(/\\(?:hline|toprule|midrule|bottomrule|hdashline)\b/g, "").replace(/\\cline\{[^}]*\}/g, "");
-  return cleaned.split(/\\\\/).map(line => line.trim()).filter(line => line.length > 0).map(line => line.split("&").map(cell => cell.trim()));
+  const rows: string[][] = []; const windows: (OverlayWindow[] | undefined)[] = [];
+  for (const line of cleaned.split(/\\\\/).map(part => part.trim()).filter(part => part.length > 0)) {
+    let text = line; let window: OverlayWindow[] | undefined;
+    const match = text.match(/^\\(?:only|uncover|visible|onslide)\s*<([^>]*)>/);
+    if (match) {
+      const range = parseOverlay(match[1]);
+      window = parseOverlayWindows(match[1]) ?? (range ? [range] : undefined);
+      text = text.slice(match[0]!.length).trim();
+    }
+    rows.push(text.split("&").map(cell => cell.trim()));
+    windows.push(window);
+  }
+  return { rows, windows };
 }
 function parseOverlayToken(token: string): { start: number; end?: number } | undefined {
   const range = token.match(/^(\d+)\s*-\s*(\d+)$/);

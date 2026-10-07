@@ -145,9 +145,11 @@ function renderTable(node: Extract<PresentationNode, { type: "table" }>): string
   const body = node.header ? node.rows.slice(1) : node.rows;
   const caption = node.caption ? `<caption>${escapeHtml(node.caption)}</caption>` : "";
   const thead = head ? `<thead><tr>${head.map(cell => `<th>${escapeHtml(cell)}</th>`).join("")}</tr></thead>` : "";
-  const tbody = `<tbody>${body.map(row => `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  const windows = node.header ? (node.windows?.slice(1) ?? []) : (node.windows ?? []);
+  const tbody = `<tbody>${body.map((row, index) => `<tr${tableRowAttrs(windows[index])}>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody>`;
   return `<table class="rt-table">${caption}${thead}${tbody}</table>`;
 }
+function tableRowAttrs(windows?: { start: number; end?: number }[]): string { if (!windows?.length) return ""; return ` class="fragment rt-overlay" data-rt-overlay-windows=${quote(windows.map(window => `${window.start}:${window.end ?? ""}`).join(","))}`; }
 function elementAttrs(options: Record<string, PropertyValue>): string { return Object.entries(options).filter(([key]) => key !== "id").map(([key, value]) => { const name = key.startsWith("data-") ? key : `data-${key}`; return value === true ? ` ${name}` : value === false ? "" : ` ${name}=${quote(String(value))}`; }).join(""); }
 function describeItem(item: Extract<PresentationNode, { type: "list-item" }>, state: VueRenderState): string {
   const content = renderNodes(item.children, state);

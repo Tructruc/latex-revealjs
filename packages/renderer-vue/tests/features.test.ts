@@ -186,6 +186,11 @@ x = 1
     expect(vue).toContain('<div class="rt-container__title">Idea</div>');
   });
 
+  it("renders table row overlays", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{T}\begin{table}[header=true]H1 & H2 \\ \only<2-> a & b \\ \end{table}\end{frame}\end{document}`);
+    expect(vue).toContain('data-rt-overlay-windows="2:"');
+  });
+
   it("renders tables and links", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{T}\begin{table}[header=true]Name & Score \\ Ada & 42 \\ \end{table}\href{https://revealjs.com}{Reveal}\end{frame}\end{document}`);
     expect(vue).toContain('<table class="rt-table">');
