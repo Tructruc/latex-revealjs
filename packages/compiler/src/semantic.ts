@@ -379,7 +379,8 @@ function padOverlaySteps(nodes: PresentationNode[], source: SourceLocation): voi
 }
 function rawCode(raw: string): string { return raw.replace(/^\n/, "").replace(/\n[ \t]*$/, ""); }
 function parseTable(raw: string): string[][] {
-  return raw.split(/\\\\/).map(line => line.trim()).filter(line => line.length > 0).map(line => line.split("&").map(cell => cell.trim()));
+  const cleaned = raw.replace(/\\(?:hline|toprule|midrule|bottomrule|hdashline)\b/g, "").replace(/\\cline\{[^}]*\}/g, "");
+  return cleaned.split(/\\\\/).map(line => line.trim()).filter(line => line.length > 0).map(line => line.split("&").map(cell => cell.trim()));
 }
 function parseOverlayToken(token: string): { start: number; end?: number } | undefined {
   const range = token.match(/^(\d+)\s*-\s*(\d+)$/);
