@@ -76,6 +76,14 @@ export class Parser {
     const name = nameArg.raw.trim();
     const optionalArguments: ArgumentNode[] = [];
     const requiredArguments: ArgumentNode[] = [];
+    let overlay: string | undefined;
+    if (RAW_ENVIRONMENTS.has(name)) {
+      this.skipInlineWhitespace();
+      if (this.peek() === "<") overlay = this.readBalanced("<", ">").raw.trim();
+    } else {
+      this.skipWhitespace();
+      if (this.peek() === "<") { overlay = this.readBalanced("<", ">").raw.trim(); this.skipWhitespace(); }
+    }
     if (RAW_ENVIRONMENTS.has(name)) {
       // Raw environments take their body verbatim, so only same-line options
       // belong to \begin. Content beginning with `{` or `[` must not be
@@ -96,12 +104,12 @@ export class Parser {
       let raw = "";
       while (this.offset < end) raw += this.advance();
       this.consume(marker);
-      return { type: "environment", name, optionalArguments, requiredArguments, children: [], raw, location: this.location(start) };
+      return { type: "environment", name, overlay, optionalArguments, requiredArguments, children: [], raw, location: this.location(start) };
     }
     const children = this.parseNodes(name);
     if (this.eof()) this.fail("RTX1004", `Unclosed environment \\begin{${name}}.`, start, `Expected \\end{${name}}.`);
     this.consume(`\\end{${name}}`);
-    return { type: "environment", name, optionalArguments, requiredArguments, children, location: this.location(start) };
+    return { type: "environment", name, overlay, optionalArguments, requiredArguments, children, location: this.location(start) };
   }
 
   private parseArgument(open: string, close: string): ArgumentNode {

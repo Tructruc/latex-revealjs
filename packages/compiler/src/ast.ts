@@ -15,6 +15,7 @@ export interface CommandNode extends AstBase {
 export interface EnvironmentNode extends AstBase {
   type: "environment";
   name: string;
+  overlay?: string;
   optionalArguments: ArgumentNode[];
   requiredArguments: ArgumentNode[];
   children: AstNode[];
