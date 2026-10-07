@@ -97,7 +97,7 @@ Overlays also accept Beamer relative forms resolved with a per-frame cursor (`<+
 \end{itemize}
 ```
 
-Display math accepts `$$...$$`, `\[...\]`, and the `equation`, `align`, `gather`, `multline`, `split`, `aligned`, `gathered`, and `cases` environments, all rendered locally with KaTeX. `\today` expands to the current date inside `\date{...}`. `\begin{markdown}...\end{markdown}` renders GitHub-flavoured Markdown at build time.
+Display math accepts `$$...$$`, `\[...\]`, and the `equation`, `align`, `gather`, `multline`, `split`, `aligned`, `gathered`, and `cases` environments, all rendered locally with KaTeX. `\today` expands to the current date inside `\date{...}`. `\begin{markdown}...\end{markdown}` renders GitHub-flavoured Markdown at build time, including `$...$`/`$$...$$` math via KaTeX.
 
 Reveal layout utilities are first-class containers: `\fittext{}`, `\stack{}`, `\hstack{}`, `\vstack{}`, `\stretch{}`, and `\frame{}`.
 

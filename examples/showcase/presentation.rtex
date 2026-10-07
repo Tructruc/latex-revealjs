@@ -107,6 +107,7 @@ Read more at \href{https://revealjs.com}{revealjs.com}.
 
 - Compiles at build time
 - **Bold**, *italic*, and `inline code`
+- Inline math renders: $E = mc^2$
 
 | Feature | Status |
 | --- | --- |

@@ -52,11 +52,12 @@ describe("HTML renderer reveal features", () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{M}\begin{markdown}
 # Hello
 
-Some **bold** text.
+Some **bold** text and $x^2$ math.
 \end{markdown}\end{frame}\end{document}`);
     expect(html).toContain('<div class="rt-markdown">');
     expect(html).toContain(">Hello</h1>");
     expect(html).toContain("<strong>bold</strong>");
+    expect(html).toContain("katex");
   });
 
   it("renders textcolor and verbatim code", async () => {

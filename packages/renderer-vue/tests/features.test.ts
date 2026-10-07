@@ -67,12 +67,13 @@ describe("Vue renderer reveal features", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{M}\begin{markdown}
 # Hello
 
-Some **bold** text.
+Some **bold** text and $x^2$ math.
 \end{markdown}\end{frame}\end{document}`);
     expect(vue).toContain('class="rt-markdown" v-html="rtMarkdown0"');
     expect(vue).toContain("const rtMarkdown0 =");
     expect(vue).toContain(">Hello</h1>");
     expect(vue).toContain("<strong>bold</strong>");
+    expect(vue).toContain("katex");
   });
 
   it("renders textcolor and verbatim code", () => {
