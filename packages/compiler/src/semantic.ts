@@ -113,7 +113,8 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
   const compileEnvironment = (node: EnvironmentNode): PresentationNode[] => {
     const options = parseOptions(node.optionalArguments[0]?.raw);
     if (["vue", "html", "react"].includes(node.name)) return [{ type: "renderer-specific", renderer: node.name, content: node.raw ?? "", source: node.location }];
-    if (node.name === "mermaid") return [{ type: "diagram", kind: "mermaid", code: (node.raw ?? "").trim(), source: node.location }];
+    if (node.name === "mermaid") return [{ type: "diagram", kind: "mermaid", code: (node.raw ?? "").trim(), options, source: node.location }];
+    if (node.name === "chart") return [{ type: "diagram", kind: "chart", code: (node.raw ?? "").trim(), options, source: node.location }];
     if (node.name === "markdown") return [{ type: "markdown", content: node.raw ?? "", source: node.location }];
     if (BLOCK_ENVIRONMENTS.has(node.name)) { const title = node.requiredArguments[0]?.raw.trim() || stringOption(options.title); return [{ type: "container", kind: node.name, options: { ...options, ...(title ? { title } : {}) }, children: flow(compile(node.children)), source: node.location }]; }
     if (ALIGN_ENVIRONMENTS[node.name]) return [{ type: "container", kind: ALIGN_ENVIRONMENTS[node.name]!, options, children: flow(compile(node.children)), source: node.location }];

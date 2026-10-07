@@ -1,7 +1,7 @@
 import type { ArgumentNode, AstNode, CommandNode, DocumentNode, EnvironmentNode, MathNode, SourceLocation, SourcePosition, TextNode } from "./ast.js";
 import { RevealTeXError } from "./diagnostics.js";
 
-const RAW_ENVIRONMENTS = new Set(["code", "verbatim", "lstlisting", "markdown", "vue", "html", "react", "mermaid", "table", "tabular", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "split", "aligned", "gathered", "displaymath", "math", "eqnarray", "eqnarray*"]);
+const RAW_ENVIRONMENTS = new Set(["code", "verbatim", "lstlisting", "markdown", "vue", "html", "react", "mermaid", "chart", "table", "tabular", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "split", "aligned", "gathered", "displaymath", "math", "eqnarray", "eqnarray*"]);
 
 export class Parser {
   private offset = 0;
@@ -76,9 +76,18 @@ export class Parser {
     const name = nameArg.raw.trim();
     const optionalArguments: ArgumentNode[] = [];
     const requiredArguments: ArgumentNode[] = [];
-    this.skipWhitespace();
-    while (this.peek() === "[") { optionalArguments.push(this.parseArgument("[", "]")); this.skipWhitespace(); }
-    while (this.peek() === "{") { requiredArguments.push(this.parseArgument("{", "}")); this.skipWhitespace(); }
+    if (RAW_ENVIRONMENTS.has(name)) {
+      // Raw environments take their body verbatim, so only same-line options
+      // belong to \begin. Content beginning with `{` or `[` must not be
+      // mistaken for an argument.
+      this.skipInlineWhitespace();
+      const line = this.line;
+      while (this.peek() === "[" && this.line === line) { optionalArguments.push(this.parseArgument("[", "]")); this.skipInlineWhitespace(); }
+    } else {
+      this.skipWhitespace();
+      while (this.peek() === "[") { optionalArguments.push(this.parseArgument("[", "]")); this.skipWhitespace(); }
+      while (this.peek() === "{") { requiredArguments.push(this.parseArgument("{", "}")); this.skipWhitespace(); }
+    }
     if (RAW_ENVIRONMENTS.has(name)) {
       const marker = `\\end{${name}}`;
       const end = this.source.indexOf(marker, this.offset);
@@ -146,6 +155,7 @@ export class Parser {
   private expect(s: string): void { this.consume(s); }
   private readWhile(pattern: RegExp): string { let out = ""; while (!this.eof() && pattern.test(this.peek())) out += this.advance(); return out; }
   private skipWhitespace(): void { while (/\s/.test(this.peek())) this.advance(); }
+  private skipInlineWhitespace(): void { while (this.peek() === " " || this.peek() === "\t" || this.peek() === "\r") this.advance(); }
   private fail(code: string, message: string, start: SourcePosition, hint?: string): never { throw new RevealTeXError({ severity: "error", code, message, hint, location: this.location(start) }); }
 }
 

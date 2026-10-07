@@ -81,6 +81,13 @@ x = 1
     expect(html).toContain('<a href="https://example.com"');
   });
 
+  it("renders charts with the Chart.js CDN runtime", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{C}\begin{chart}[type=line]{"labels":["A"],"datasets":[{"data":[1]}]}\end{chart}\end{frame}\end{document}`);
+    expect(html).toContain('class="rt-chart"');
+    expect(html).toContain('data-chart-type="line"');
+    expect(html).toContain("chart.js@4");
+  });
+
   it("renders mermaid diagrams with the CDN runtime", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{D}\begin{mermaid}graph LR
   A --> B

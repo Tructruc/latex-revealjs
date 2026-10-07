@@ -110,6 +110,14 @@ graph LR
 \end{mermaid}
 ```
 
+Charts use Chart.js (loaded from a CDN) with any Chart.js data object and a `type` option:
+
+```latex
+\begin{chart}[type=bar]
+{ "labels": ["A", "B"], "datasets": [{ "label": "Score", "data": [94.7, 12.4] }] }
+\end{chart}
+```
+
 Related vertical slides can carry their own transition with `\begin{section}[transition=convex]{Title}`.
 
 Frames accept a `\framesubtitle{...}`, and `\tableofcontents` (after `\maketitle`) inserts a linked outline slide built from the document sections. Lists reveal incrementally with `\begin{itemize}[<+->]` (or `[incremental=true]`). Beamer blocks and theorem-like environments map to titled containers: `\begin{block}{Title}...`, plus `alertblock`, `exampleblock`, `theorem`, `lemma`, `corollary`, `proposition`, `definition`, `example`, `proof`, and `remark`.

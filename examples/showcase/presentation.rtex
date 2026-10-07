@@ -114,6 +114,11 @@ Read more at \href{https://revealjs.com}{revealjs.com}.
 | Lists | yes |
 \end{markdown}
 \end{frame}
+\begin{frame}{Metrics chart}
+\begin{chart}[type=bar]
+{ "labels": ["Accuracy", "Latency", "Memory"], "datasets": [{ "label": "Score", "data": [94.7, 12.4, 2.1], "backgroundColor": ["#8b5cf6", "#6366f1", "#38bdf8"] }] }
+\end{chart}
+\end{frame}
 \begin{frame}{A diagram}
 \begin{mermaid}
 graph LR

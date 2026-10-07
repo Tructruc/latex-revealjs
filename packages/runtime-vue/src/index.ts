@@ -5,6 +5,7 @@ export { default as RevealNotes } from "./RevealNotes.vue";
 export { default as RevealMath } from "./RevealMath.vue";
 export { default as RevealCode } from "./RevealCode.vue";
 export { default as Mermaid } from "./Mermaid.vue";
+export { default as Chart } from "./Chart.vue";
 export { useRevealContext, usePresentationLifecycle } from "./reveal-context";
 export { applyOverlayVisibility, currentOverlayNumber, overlayInWindows, overlayShouldHide, parseOverlayWindowsAttr } from "./overlays";
 export type { RevealContext, RevealEvent, RevealEventListener, RevealEventName } from "./reveal-context";

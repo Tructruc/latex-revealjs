@@ -30,12 +30,18 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain(":index='1'");
   });
 
+  it("renders charts", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{C}\begin{chart}[type=line]{"labels":["A"],"datasets":[{"data":[1]}]}\end{chart}\end{frame}\end{document}`);
+    expect(vue).toContain('<Chart type="line"');
+    expect(vue).toContain(", Chart }");
+  });
+
   it("emits mermaid diagrams and vertical stack transitions", () => {
     const vue = generate(String.raw`\begin{document}\begin{section}[transition=convex,transition-speed=fast]{S}\begin{frame}{D}\begin{mermaid}graph LR
   A --> B
 \end{mermaid}\end{frame}\end{section}\end{document}`);
     expect(vue).toContain('<Mermaid kind="mermaid"');
-    expect(vue).toContain(", Mermaid }");
+    expect(vue).toContain(", Mermaid, Chart }");
     expect(vue).toContain('class="rt-slide-stack" data-transition="convex" data-transition-speed="fast"');
   });
 
