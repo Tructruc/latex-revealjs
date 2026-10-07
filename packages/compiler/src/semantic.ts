@@ -88,7 +88,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       case "image": case "video": case "svg": assets.push({ kind: node.name, path: arg(), source: node.location }); return [{ type: node.name, src: arg(), options, source: node.location }];
       case "includegraphics": assets.push({ kind: "image", path: arg(), source: node.location }); return [{ type: "image", src: arg(), options, source: node.location }];
       case "lstinputlisting": { const path = arg(); assets.push({ kind: "data", path, source: node.location }); return [{ type: "code", code: "", language: stringOption(options.language), options, src: path, source: node.location }]; }
-      case "note": return [{ type: "notes", children: flow(children()), source: node.location }];
+      case "note": return [{ type: "notes", item: node.optionalArguments[0]?.raw.trim() === "item", children: flow(children()), source: node.location }];
       case "slot": return [{ type: "slot", name: arg(), children: flow(children(1)), source: node.location }];
       case "id": case "element": return [{ type: "element", id: node.name === "id" ? arg() : stringOption(options.id), options, children: node.name === "id" ? children(1) : children(), source: node.location }];
       case "place": case "position": return [{ type: "container", kind: node.name, options, children: children(), source: node.location }];
@@ -248,7 +248,12 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     });
     overlayCursor = 1;
     footnotes = [];
-    const body = compile(contentAst); const notes = body.filter(n => n.type === "notes").flatMap(n => n.children); const children = flow(body.filter(n => n.type !== "notes"));
+    const body = compile(contentAst);
+    const noteNodes = body.filter((n): n is Extract<PresentationNode, { type: "notes" }> => n.type === "notes");
+    const notes: PresentationNode[] = [...noteNodes.filter(n => !n.item).flatMap(n => n.children)];
+    const noteItems = noteNodes.filter(n => n.item);
+    if (noteItems.length) notes.push({ type: "list", ordered: false, items: noteItems.map(n => ({ type: "list-item", children: n.children, source: n.source })), source: noteItems[0]!.source });
+    const children = flow(body.filter(n => n.type !== "notes"));
     if (footnotes.length) children.push({ type: "container", kind: "footnotes", options: {}, children: footnotes.map((nodes, index) => ({ type: "paragraph", children: [{ type: "format", style: "footnote-marker", children: [{ type: "text", value: `${index + 1}`, source: node.location }], source: node.location }, ...nodes.flatMap(inner => inner.type === "paragraph" ? inner.children : [inner])], source: node.location })), source: node.location });
     padOverlaySteps(children, node.location);
     const explicitId = stringOption(options.id) ?? stringOption(options.label) ?? labelValue;

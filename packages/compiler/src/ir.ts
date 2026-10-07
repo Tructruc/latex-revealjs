@@ -39,7 +39,7 @@ export interface MarkdownIR extends BaseIR { type: "markdown"; content: string }
 export interface LinkIR extends BaseIR { type: "link"; href: string; children: PresentationNode[] }
 export interface TableIR extends BaseIR { type: "table"; rows: string[][]; header: boolean; caption?: string; options: Record<string, PropertyValue> }
 export interface SlotIR extends BaseIR { type: "slot"; name: string; children: PresentationNode[] }
-export interface NotesIR extends BaseIR { type: "notes"; children: PresentationNode[] }
+export interface NotesIR extends BaseIR { type: "notes"; item?: boolean; children: PresentationNode[] }
 export interface ComponentIR extends BaseIR { type: "component"; name: string; props: Record<string, PropertyValue>; slots: Record<string, PresentationNode[]>; children: PresentationNode[] }
 export interface ElementIR extends BaseIR { type: "element"; id?: string; options: Record<string, PropertyValue>; children: PresentationNode[] }
 export interface RawRendererBlockIR extends BaseIR { type: "renderer-specific"; renderer: string; content: string }
