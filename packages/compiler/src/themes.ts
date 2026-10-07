@@ -26,3 +26,12 @@ export type RevealTheme = (typeof REVEAL_THEMES)[number];
 export function isRevealTheme(name: string | undefined): name is RevealTheme {
   return Boolean(name && (REVEAL_THEMES as readonly string[]).includes(name));
 }
+
+/** Themes bundled with RevealTeX itself (CSS variable palettes). */
+export const REVEALTEX_THEMES = ["aurora", "midnight", "paper", "ocean"] as const;
+
+export type RevealTeXTheme = (typeof REVEALTEX_THEMES)[number];
+
+export function isRevealTeXTheme(name: string | undefined): name is RevealTeXTheme {
+  return Boolean(name && (REVEALTEX_THEMES as readonly string[]).includes(name));
+}

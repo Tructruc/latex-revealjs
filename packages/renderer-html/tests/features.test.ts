@@ -82,6 +82,11 @@ x = 1
     expect(html).toContain('<a href="https://example.com"');
   });
 
+  it("applies built-in RevealTeX theme classes", async () => {
+    const html = await render(String.raw`\theme{ocean}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
+    expect(html).toContain('class="reveal rt-theme-ocean"');
+  });
+
   it("emits background video attributes", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}[background-video=bg.mp4,background-video-muted,background-video-loop,background-size=cover]{V}V\end{frame}\end{document}`);
     expect(html).toContain('data-background-video="bg.mp4"');

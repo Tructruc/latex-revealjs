@@ -60,6 +60,12 @@ A-->B
     expect(vue).toContain("rt-footnote-ref");
   });
 
+  it("applies built-in RevealTeX theme classes", () => {
+    const vue = generate(String.raw`\theme{paper}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
+    expect(vue).toContain('class="rt-theme-paper"');
+    expect(vue).not.toContain("reveal.js/dist/theme/paper.css");
+  });
+
   it("renders description lists", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{D}\begin{description}\item[Term] Meaning\end{description}\end{frame}\end{document}`);
     expect(vue).toContain('<dl class="rt-description">');
