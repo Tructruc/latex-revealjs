@@ -132,7 +132,9 @@ Accuracy & 94.7% \\
 \end{table}
 ```
 
-Links compile to real anchors: `\href{https://revealjs.com}{revealjs.com}`, `\url{https://revealjs.com}`, and `\hyperlink{slide-label}{jump}` for cross-slide navigation. `\begin{description}\item[Term] ...\end{description}` renders a definition list. Inline formatting includes `\textbf`, `\textit`, `\emph`/`\em`, `\texttt`, `\textsf`, `\textsc`, `\underline`, `\alert`, `\small`, `\large`, `\Huge`, and `\textcolor{...}{...}`; `\includegraphics` is an alias for `\image`.
+Links compile to real anchors: `\href{https://revealjs.com}{revealjs.com}`, `\url{https://revealjs.com}`, `\email{...}`, and `\hyperlink{slide-label}{jump}` for cross-slide navigation. `\begin{description}\item[Term] ...\end{description}` renders a definition list. Inline formatting includes `\textbf`, `\textit`, `\emph`/`\em`, `\texttt`, `\textsf`, `\textsc`, `\underline`, `\alert`, `\structure`, `\small`, `\large`, `\Huge`, `\textsuperscript`, `\textsubscript`, and `\textcolor{...}{...}`; `\includegraphics` is an alias for `\image`. Use `\vspace{}`/`\hspace{}` (or `\bigskip`) for spacing, and `\begin{columns}[align=center]` with `\column[t]{0.5}` for per-column alignment.
+
+Overlay environments are the block forms of the overlay commands: `\begin{onlyenv}<2->`, `visibleenv`, `uncoverenv`, and `onslideenv`. `\beamerdefaultoverlayspecification{<+->}` makes lists incremental by default.
 
 A minimal deck lives in [`examples/minimal`](./examples/minimal).
 
