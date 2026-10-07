@@ -19,8 +19,8 @@ export async function parseFileWithIncludes(entry: string): Promise<{ ast: Docum
 async function expand(nodes: AstNode[], owner: string, load: (file: string) => Promise<DocumentNode>): Promise<AstNode[]> {
   const output: AstNode[] = [];
   for (const node of nodes) {
-    if (node.type === "command" && (node.name === "input" || node.name === "include" || node.name === "subimport")) {
-      const requested = node.name === "subimport" ? node.requiredArguments[1]?.raw.trim() : node.requiredArguments[0]?.raw.trim();
+    if (node.type === "command" && (node.name === "input" || node.name === "include" || node.name === "subimport" || node.name === "import")) {
+      const requested = (node.name === "subimport" || node.name === "import") ? node.requiredArguments[1]?.raw.trim() : node.requiredArguments[0]?.raw.trim();
       if (!requested) throw new RevealTeXError({ severity: "error", code: "RTX2002", message: `\\${node.name} requires a file path.`, location: node.location });
       const included = await load(resolve(dirname(owner), requested)); output.push(...included.children); continue;
     }
