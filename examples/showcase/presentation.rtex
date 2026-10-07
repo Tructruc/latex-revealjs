@@ -4,6 +4,8 @@
 \author{RevealTeX}
 \institute{RevealTeX Labs}
 \date{Runtime integration showcase}
+\titlegraphic{assets/pipeline.svg}
+\logo{assets/pipeline.svg}
 \theme{aurora}
 \transition{slide}
 \transitionspeed{fast}

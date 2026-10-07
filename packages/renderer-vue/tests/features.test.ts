@@ -30,6 +30,12 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain(":index='1'");
   });
 
+  it("applies media width, height, and class options", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{I}\image[width=50%,height=10em,class=hero]{a.png}\end{frame}\end{document}`);
+    expect(vue).toContain("width:50%;height:10em");
+    expect(vue).toContain("hero");
+  });
+
   it("renders a logo on slides", () => {
     const vue = generate(String.raw`\logo{assets/logo.svg}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
     expect(vue).toContain('class="rt-logo"');
