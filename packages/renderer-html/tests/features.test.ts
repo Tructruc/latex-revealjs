@@ -82,6 +82,11 @@ x = 1
     expect(html).toContain('<a href="https://example.com"');
   });
 
+  it("renders a logo on slides", async () => {
+    const html = await render(String.raw`\logo{assets/logo.svg}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
+    expect(html).toContain('<img class="rt-logo"');
+  });
+
   it("renders charts with the Chart.js CDN runtime", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{C}\begin{chart}[type=line]{"labels":["A"],"datasets":[{"data":[1]}]}\end{chart}\end{frame}\end{document}`);
     expect(html).toContain('class="rt-chart"');

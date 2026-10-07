@@ -30,6 +30,11 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain(":index='1'");
   });
 
+  it("renders a logo on slides", () => {
+    const vue = generate(String.raw`\logo{assets/logo.svg}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
+    expect(vue).toContain('class="rt-logo"');
+  });
+
   it("merges source reveal options into RevealDeck options", () => {
     const vue = generate(String.raw`\reveal{autoAnimate=true,transition=none}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
     expect(vue).toContain('"autoAnimate": true');
