@@ -178,7 +178,8 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       const columns: ColumnIR[] = []; let current: AstNode[] = []; let currentCommand: CommandNode | undefined;
       const flush = () => { if (currentCommand || current.some(n => n.type !== "text" || n.value.trim())) { const overlay = resolveOverlay(currentCommand?.overlay); columns.push({ type: "column", width: currentCommand?.requiredArguments[0]?.raw.trim(), align: currentCommand?.optionalArguments[0]?.raw.trim() || undefined, index: overlay && overlay.start > 1 ? overlay.start - 1 : undefined, start: overlay?.start, end: overlay?.end, windows: overlay?.windows, children: flow(compile(current)), source: currentCommand?.location ?? node.location }); } current = []; };
       for (const child of node.children) { if (child.type === "command" && child.name === "column") { flush(); currentCommand = child; } else current.push(child); }
-      flush(); return [{ type: "columns", gap: stringOption(options.gap), alignment: stringOption(options.align), columns, source: node.location }];
+      flush(); const columnsNode: PresentationNode = { type: "columns", gap: stringOption(options.gap), alignment: stringOption(options.align), columns, source: node.location };
+      return node.overlay ? overlayContent(false, resolveOverlay(node.overlay), [columnsNode], node.location) : [columnsNode];
     }
     if (node.name === "component") { const name = stringOption(options.name) ?? node.requiredArguments[0]?.raw.trim() ?? ""; return [makeComponent(name, optionsWithout(options, "name"), compile(node.children), node.location)]; }
     if (components[node.name] || config.aliases?.[node.name]) return [makeComponent(node.name, options, flow(compile(node.children)), node.location)];
