@@ -270,7 +270,12 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       const value = node.requiredArguments[0]?.raw.trim();
       if (node.name === "titlegraphic") { presentation.metadata.titlegraphic = value; if (value) assets.push({ kind: "image", path: value, source: node.location }); continue; }
       if (node.name === "logo") { presentation.metadata.logo = value; if (value) assets.push({ kind: "image", path: value, source: node.location }); continue; }
-      if (["title", "subtitle", "author", "institute", "date", "description"].includes(node.name)) { presentation.metadata[node.name as keyof typeof presentation.metadata] = value.replace(/\\today\b/g, todayString()); continue; }
+      if (["title", "subtitle", "author", "institute", "date", "description"].includes(node.name)) {
+        let text = value.replace(/\\today\b/g, todayString());
+        if (node.name === "author") text = text.replace(/\s*\\and\s*/g, ", ");
+        presentation.metadata[node.name as keyof typeof presentation.metadata] = text;
+        continue;
+      }
       if (node.name === "theme") { presentation.configuration.theme = value; continue; }
       if (node.name === "reveal") { presentation.configuration.reveal = { ...(presentation.configuration.reveal ?? {}), ...parseOptions(node.optionalArguments[0]?.raw ?? node.requiredArguments[0]?.raw) }; continue; }
       if (node.name === "transition") { presentation.configuration.transition = value; continue; }
