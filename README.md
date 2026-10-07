@@ -61,7 +61,7 @@ Includes resolve relative to their owner and reject cycles. `\input`, `\include`
 
 ## Reveal features
 
-`\theme{name}` selects a built-in reveal theme (`black`, `black-contrast`, `white`, `white-contrast`, `league`, `beige`, `sky`, `night`, `serif`, `simple`, `solarized`, `moon`, `dracula`, `blood`); a local `config.theme.css` still overrides it.
+`\theme{name}` selects a built-in reveal theme (`black`, `black-contrast`, `white`, `white-contrast`, `league`, `beige`, `sky`, `night`, `serif`, `simple`, `solarized`, `moon`, `dracula`, `blood`); a local `config.theme.css` still overrides it. Global reveal options can be set in source with `\reveal{autoAnimate=true,transition=none}`, merged over `config.reveal`.
 
 Any unrecognised frame option is emitted as a `data-*` attribute, so every reveal.js feature is reachable without waiting for first-class syntax:
 

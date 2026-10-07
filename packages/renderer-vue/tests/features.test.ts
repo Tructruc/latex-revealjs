@@ -30,6 +30,12 @@ describe("Vue renderer reveal features", () => {
     expect(vue).toContain(":index='1'");
   });
 
+  it("merges source reveal options into RevealDeck options", () => {
+    const vue = generate(String.raw`\reveal{autoAnimate=true,transition=none}\begin{document}\begin{frame}{A}A\end{frame}\end{document}`);
+    expect(vue).toContain('"autoAnimate": true');
+    expect(vue).toContain('"transition": "none"');
+  });
+
   it("renders charts", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{C}\begin{chart}[type=line]{"labels":["A"],"datasets":[{"data":[1]}]}\end{chart}\end{frame}\end{document}`);
     expect(vue).toContain('<Chart type="line"');

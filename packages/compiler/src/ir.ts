@@ -4,6 +4,7 @@ export type PropertyValue = string | number | boolean | null | PropertyValue[] |
 export interface PresentationMetadata { title?: string; subtitle?: string; author?: string; institute?: string; date?: string; description?: string }
 export interface PresentationConfiguration {
   theme?: string; transition?: string; transitionSpeed?: string; controls?: boolean; progress?: boolean; slideNumbers?: boolean;
+  reveal?: Record<string, PropertyValue>;
   stylesheets: string[]; scripts: string[]; mathMacros: Record<string, string>;
 }
 export interface BaseIR { type: string; source: SourceLocation }

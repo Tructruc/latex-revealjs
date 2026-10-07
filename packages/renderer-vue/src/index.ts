@@ -31,7 +31,7 @@ export function renderVue(presentation: PresentationIR, config: RevealTeXConfig 
   const vueImports = [...used].some(name => components[name]?.lazy) ? 'import { defineAsyncComponent } from "vue";' : "";
   const themeName = presentation.configuration.theme ?? config.theme?.name;
   const themeImport = !config.theme?.css && isRevealTheme(themeName) ? `import ${JSON.stringify(`reveal.js/dist/theme/${themeName}.css`)};` : "";
-  const revealOptions = { ...(config.reveal ?? {}), ...stripUndefined({ transition: presentation.configuration.transition, transitionSpeed: presentation.configuration.transitionSpeed, controls: presentation.configuration.controls, progress: presentation.configuration.progress, slideNumber: presentation.configuration.slideNumbers }) };
+  const revealOptions = { ...(config.reveal ?? {}), ...(presentation.configuration.reveal ?? {}), ...stripUndefined({ transition: presentation.configuration.transition, transitionSpeed: presentation.configuration.transitionSpeed, controls: presentation.configuration.controls, progress: presentation.configuration.progress, slideNumber: presentation.configuration.slideNumbers }) };
   const lines = presentation.navigation.map(item => item.type === "slide-stack"
     ? indent(`<section class="rt-slide-stack"${stackAttrs(item)}>\n${item.slides.map(slide => indent(renderSlide(slide, renderState), 2)).join("\n")}\n</section>`, 4)
     : indent(renderSlide(item, renderState), 4)).join("\n");
