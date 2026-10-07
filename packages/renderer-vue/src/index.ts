@@ -132,7 +132,7 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
     case "table": return renderTable(node);
     case "slot": return `<template #${safeName(node.name)}>${renderNodes(node.children, state)}</template>`;
     case "notes": return `<RevealNotes>${renderNodes(node.children, state)}</RevealNotes>`;
-    case "element": return `<div${node.id ? ` data-id=${quote(node.id)}` : ""}>${renderNodes(node.children, state)}</div>`;
+    case "element": return `<div${node.id ? ` data-id=${quote(node.id)}` : ""}${elementAttrs(node.options)}>${renderNodes(node.children, state)}</div>`;
     case "container": { if(node.kind==="vspace") return `<div class="rt-vspace" style=${quote(`height:${String(node.options.size ?? "")}`)}></div>`; if(node.kind==="hspace") return `<span class="rt-hspace" style=${quote(`display:inline-block;width:${String(node.options.size ?? "")}`)}></span>`; const tag=containerTag(node.kind);const heading=typeof node.options.title==="string"&&node.options.title?`<div class="rt-container__title">${escapeHtml(node.options.title)}</div>`:"";return `<${tag} class=${quote(containerClass(node.kind,node.options))}${containerStyle(node.kind,node.options)}>${heading}${renderNodes(node.children, state)}</${tag}>`; }
     case "renderer-specific": return node.renderer === "vue" || node.renderer === "html" ? node.content : "";
     case "component": { const slots = Object.entries(node.slots).map(([name, children]) => `<template #${safeName(name)}>${renderNodes(children, state)}</template>`).join(""); return `<${safeName(node.name)}${componentAttrs(node.name, node.props, node.source.file, state)}>${slots}${renderNodes(node.children, state)}</${safeName(node.name)}>`; }
@@ -148,6 +148,7 @@ function renderTable(node: Extract<PresentationNode, { type: "table" }>): string
   const tbody = `<tbody>${body.map(row => `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody>`;
   return `<table class="rt-table">${caption}${thead}${tbody}</table>`;
 }
+function elementAttrs(options: Record<string, PropertyValue>): string { return Object.entries(options).filter(([key]) => key !== "id").map(([key, value]) => { const name = key.startsWith("data-") ? key : `data-${key}`; return value === true ? ` ${name}` : value === false ? "" : ` ${name}=${quote(String(value))}`; }).join(""); }
 function describeItem(item: Extract<PresentationNode, { type: "list-item" }>, state: VueRenderState): string {
   const content = renderNodes(item.children, state);
   if (item.index === undefined && item.start === undefined && item.end === undefined && item.windows === undefined) return `<dd>${content}</dd>`;

@@ -85,6 +85,12 @@ A-->B
     expect(vue).toContain("transform:rotate(90deg) scale(1.5)");
   });
 
+  it("emits element data attributes", () => {
+    const vue = generate(String.raw`\begin{document}\begin{frame}{E}\element[id=model,data-state=ready]{X}\end{frame}\end{document}`);
+    expect(vue).toContain('data-id="model"');
+    expect(vue).toContain('data-state="ready"');
+  });
+
   it("renders text line breaks", () => {
     const vue = generate(String.raw`\begin{document}\begin{frame}{A\\B}C\end{frame}\end{document}`);
     expect(vue).toContain("A<br>B");
