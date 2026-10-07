@@ -118,7 +118,7 @@ function renderNode(node: PresentationNode, state: VueRenderState): string {
       return `<li class=${quote(classes)}${indexAttr}${overlayDataAttrs(node)}>${renderNodes(node.children, state)}</li>`;
     }
     case "columns": return `<div class="rt-columns"${columnStyle(node.gap, node.alignment)}>${node.columns.map(column => renderNode(column, state)).join("")}</div>`;
-    case "column": return `<div class="rt-column"${node.width ? ` style=${quote(`flex-basis:${columnWidth(node.width)}`)}` : ""}>${renderNodes(node.children, state)}</div>`;
+    case "column": { const styles = [node.width ? `flex-basis:${columnWidth(node.width)}` : "", node.align ? `align-self:${columnAlignment(node.align)}` : ""].filter(Boolean).join(";"); return `<div class="rt-column"${styles ? ` style=${quote(styles)}` : ""}>${renderNodes(node.children, state)}</div>`; }
     case "image": return `<figure><img ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["alt"])}${mediaPresentationAttrs(node.options)} />${node.options.caption ? `<figcaption>${escapeHtml(String(node.options.caption))}</figcaption>` : ""}</figure>`;
     case "svg": return `<img ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["alt"])}${mediaPresentationAttrs(node.options, "rt-svg")} />`;
     case "video": return `<video ${assetAttribute("src", node.src, node.source.file, state.assetBindings)}${attrs(node.options, ["autoplay", "muted", "loop", "controls", "poster"])}${mediaPresentationAttrs(node.options)}></video>`;
@@ -168,7 +168,7 @@ function overlayDataAttrs(node: { index?: number; start?: number; end?: number; 
 }
 function animationStyle(node: Extract<PresentationNode, { type: "animation" }>): string { const values = [node.duration && `--rt-duration:${node.duration}`, node.delay && `--rt-delay:${node.delay}`, node.easing && `--rt-easing:${node.easing}`].filter(Boolean); return values.length ? ` style=${quote(values.join(";"))}` : ""; }
 function columnStyle(gap?: string, alignment?: string): string { const values = [gap && `gap:${gap}`, alignment && `align-items:${columnAlignment(alignment)}`].filter(Boolean); return values.length ? ` style=${quote(values.join(";"))}` : ""; }
-function columnAlignment(value: string): string { return ({ top: "flex-start", start: "flex-start", middle: "center", center: "center", bottom: "flex-end", end: "flex-end" } as Record<string, string>)[value] ?? value; }
+function columnAlignment(value: string): string { return ({ top: "flex-start", start: "flex-start", t: "flex-start", middle: "center", center: "center", c: "center", bottom: "flex-end", end: "flex-end", b: "flex-end" } as Record<string, string>)[value] ?? value; }
 const REVEAL_UTILITY_CLASSES: Record<string,string> = { "fit-text":"r-fit-text", stack:"r-stack", hstack:"r-hstack", vstack:"r-vstack", stretch:"r-stretch", frame:"r-frame" };
 function containerTag(kind:string):string{return kind==="badge"?"span":kind==="callout"?"aside":kind==="quote"?"blockquote":"div";}
 function containerClass(kind:string,options:Record<string,PropertyValue>):string{const base=REVEAL_UTILITY_CLASSES[kind]??`rt-${kind.replace(":","-")}`;const variant=typeof options.variant==="string"?`${base}--${options.variant.replace(/[^a-z0-9_-]/gi,"-")}`:"";return[base,variant].filter(Boolean).join(" ");}

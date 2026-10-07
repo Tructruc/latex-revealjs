@@ -30,7 +30,7 @@ export interface FragmentIR extends BaseIR {
 export interface AnimationIR extends BaseIR { type: "animation"; effect: string; duration?: string; delay?: string; easing?: string; children: PresentationNode[] }
 export interface ListItemIR extends BaseIR { type: "list-item"; label?: string; index?: number; start?: number; end?: number; windows?: OverlayWindow[]; only?: boolean; children: PresentationNode[] }
 export interface ListIR extends BaseIR { type: "list"; ordered: boolean; description?: boolean; items: ListItemIR[] }
-export interface ColumnIR extends BaseIR { type: "column"; width?: string; children: PresentationNode[] }
+export interface ColumnIR extends BaseIR { type: "column"; width?: string; align?: string; children: PresentationNode[] }
 export interface ColumnsIR extends BaseIR { type: "columns"; gap?: string; alignment?: string; columns: ColumnIR[] }
 export interface MediaIR extends BaseIR { type: "image" | "video" | "svg"; src: string; options: Record<string, PropertyValue> }
 export interface CodeIR extends BaseIR { type: "code"; code: string; language?: string; options: Record<string, PropertyValue>; src?: string }
