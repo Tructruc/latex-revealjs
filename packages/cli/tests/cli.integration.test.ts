@@ -183,6 +183,19 @@ describe.sequential("RevealTeX CLI integration", () => {
     await expectMissing(replacementPath);
   }, 20_000);
 
+  it("discovers components in nested directories", async () => {
+    const fixture = await createFixture("nested-discovery");
+    const nested = join(fixture.root, "components", "widgets");
+    await mkdir(nested, { recursive: true });
+    await writeFile(join(nested, "Widget.vue"), vueComponent("widget"));
+    await writeFile(fixture.config, `export default { renderer: "vue", components: { autoDiscover: "./components" } };\n`);
+    await writeFile(fixture.source, deck("Nested", String.raw`\Widget[]`));
+
+    await runCli(["build", fixture.source, "--config", fixture.config, "--output", fixture.output]);
+    const vue = await readFile(join(fixture.output, "Presentation.generated.vue"), "utf8");
+    expect(vue).toContain("import Widget from");
+  }, 20_000);
+
   it("validates props introspected from auto-discovered components", async () => {
     const fixture = await createFixture("introspect");
     const components = join(fixture.root, "components");

@@ -155,6 +155,15 @@ export default defineConfig({
 });
 ```
 
+The `props` schema is optional: the CLI reads each component's `.vue` source and derives it from `defineProps` (type literals, optional flags, string-literal enums, arrays, `withDefaults` defaults, or runtime object declarations), with any explicit config schema taking precedence. Set `components.autoDiscover` to a folder to register every `.vue` file recursively, and `aliases` to expose a component under extra command names:
+
+```ts
+export default defineConfig({
+  components: { autoDiscover: "./src/components" },
+  aliases: { Score: "MetricCard" }
+});
+```
+
 Then use it as native presentation syntax. Imports are deduplicated and values retain their types:
 
 ```latex

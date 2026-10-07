@@ -95,6 +95,18 @@ async function main(): Promise<void> {
   }
 }
 
+async function collectVueFiles(directory: string): Promise<string[]> {
+  const files: string[] = [];
+  let entries;
+  try { entries = await readdir(directory, { withFileTypes: true }); } catch { return files; }
+  for (const entry of entries) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...await collectVueFiles(path));
+    else if (entry.isFile() && entry.name.endsWith(".vue")) files.push(path);
+  }
+  return files;
+}
+
 async function findConfigFile(explicit: string | undefined, cwd: string): Promise<string | undefined> {
   if (explicit) return explicit;
   for (const candidate of ["revealtex.config.ts", "revealtex.config.mjs", "revealtex.config.js"]) {
@@ -128,10 +140,8 @@ async function loadConfig(file: string | undefined): Promise<RevealTeXConfig> {
   if (config.styles) config.styles = config.styles.map(style => style.startsWith(".") ? resolve(dirname(file), style) : style);
   if (config.components?.autoDiscover) {
     const folder = resolve(dirname(file), config.components.autoDiscover);
-    const entries = await readdir(folder, { withFileTypes: true });
-    const discovered = Object.fromEntries(entries
-      .filter(entry => entry.isFile() && entry.name.endsWith(".vue"))
-      .map(entry => [basename(entry.name, ".vue"), { source: join(folder, entry.name) }]));
+    const discovered = Object.fromEntries((await collectVueFiles(folder))
+      .map(path => [basename(path, ".vue"), { source: path }]));
     config.components = { ...discovered, ...config.components, autoDiscover: folder } as RevealTeXConfig["components"];
   }
   const componentGroups = [config.components, ...(config.plugins ?? []).map(plugin => plugin.components)];
@@ -196,7 +206,7 @@ function reconcileDirectoryWatchers(active: Map<string, ActiveDirectoryWatcher>,
     }
     const state: ActiveDirectoryWatcher = { watcher: undefined as unknown as FSWatcher, all: specification.all, names: specification.names };
     try {
-      state.watcher = watch(directory, (_event, filename) => {
+      state.watcher = watch(directory, { recursive: state.all }, (_event, filename) => {
         const name = filename === null ? undefined : String(filename);
         if (state.all || name === undefined || state.names.has(name)) onChange();
       });

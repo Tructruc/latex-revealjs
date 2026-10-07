@@ -23,6 +23,8 @@ export interface RevealTeXConfig {
   renderer?: string; source?: string; output?: string; reveal?: Record<string, unknown>;
   theme?: { name?: string; css?: string }; styles?: string[];
   components?: Record<string, ComponentDefinition> & { autoDiscover?: string };
+  /** Maps alternative command names onto registered component names. */
+  aliases?: Record<string, string>;
   layouts?: Record<string, LayoutDefinition>; presets?: Record<string, { component: string; props?: Record<string, PropertyValue> }>;
   sections?: { autoDividerSlides?: boolean };
   plugins?: RevealTeXPlugin[];

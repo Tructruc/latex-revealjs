@@ -103,7 +103,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       case "newcommand": presentation.configuration.mathMacros[arg().replace(/^\\/, "")] = arg(1); return [];
       case "maketitle": return [];
       default:
-        if (components[node.name]) return [makeComponent(node.name, options, children(), node.location)];
+        if (components[node.name] || config.aliases?.[node.name]) return [makeComponent(node.name, options, children(), node.location)];
         if (pluginCommands[node.name]) { const compiledChildren = flow(children()); return [makePluginComponent(pluginCommands[node.name], { name: node.name, options, argument: arg() || undefined, arguments: node.requiredArguments.map(argument => argument.raw.trim()), children: compiledChildren, source: node.location }, false)]; }
         if (!BUILTIN_COMMANDS.has(node.name)) diagnostics.push(unknownDiagnostic("command", node.name, node.location, [...Object.keys(components), ...Object.keys(pluginCommands)]));
         return [];
@@ -159,7 +159,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       flush(); return [{ type: "columns", gap: stringOption(options.gap), alignment: stringOption(options.align), columns, source: node.location }];
     }
     if (node.name === "component") { const name = stringOption(options.name) ?? node.requiredArguments[0]?.raw.trim() ?? ""; return [makeComponent(name, optionsWithout(options, "name"), compile(node.children), node.location)]; }
-    if (components[node.name]) return [makeComponent(node.name, options, flow(compile(node.children)), node.location)];
+    if (components[node.name] || config.aliases?.[node.name]) return [makeComponent(node.name, options, flow(compile(node.children)), node.location)];
     if (pluginEnvironments[node.name]) { const compiledChildren = flow(compile(node.children)); return [makePluginComponent(pluginEnvironments[node.name], { name: node.name, options, argument: node.requiredArguments[0]?.raw.trim(), arguments: node.requiredArguments.map(argument => argument.raw.trim()), children: compiledChildren, source: node.location }, true)]; }
     if (node.name === "layout") return [{ type: "container", kind: `layout:${String(options.name ?? "default")}`, options, children: flow(compile(node.children)), source: node.location }];
     if (node.name !== "document") diagnostics.push(unknownDiagnostic("environment", node.name, node.location, Object.keys(components)));
@@ -167,7 +167,8 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
   };
 
   const makeComponent = (name: string, supplied: Record<string, PropertyValue>, childNodes: PresentationNode[], source: SourceLocation): ComponentIR => {
-    const preset = config.presets?.[name]; const actualName = preset?.component ?? name;
+    const aliased = config.aliases?.[name] ?? name;
+    const preset = config.presets?.[aliased] ?? config.presets?.[name]; const actualName = preset?.component ?? aliased;
     const props = { ...(preset?.props ?? {}), ...supplied }; const definition = components[actualName];
     if (!definition) diagnostics.push(unknownDiagnostic("component", actualName, source, Object.keys(components)));
     else {
