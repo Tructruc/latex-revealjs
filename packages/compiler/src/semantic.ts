@@ -15,7 +15,7 @@ const REVEAL_UTILITY_CONTAINERS: Record<string, string> = { fittext: "fit-text",
 const BLOCK_ENVIRONMENTS = new Set(["block", "alertblock", "exampleblock", "theorem", "lemma", "corollary", "proposition", "definition", "example", "proof", "remark"]);
 const ALIGN_ENVIRONMENTS: Record<string, string> = { center: "align-center", flushleft: "align-left", flushright: "align-right", quote: "quote", quotation: "quote" };
 const OVERLAY_COMMANDS = new Set(["only", "uncover", "visible", "onslide", "alt", "temporal"]);
-const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "hyperlink", "textcolor", "colorbox", "footnote", "includegraphics", "frametitle", "framesubtitle", "vspace", "hspace", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
+const BUILTIN_COMMANDS = new Set(["documentclass", "title", "subtitle", "author", "date", "description", "theme", "transition", "transitionspeed", "maketitle", "fragment", "animate", "item", "pause", "column", "image", "video", "svg", "note", "slot", "component", "id", "element", "background", "backgroundcolor", "backgroundimage", "backgroundgradient", "backgroundvideo", "backgroundiframe", "stylesheet", "script", "section", "slidenumbers", "progressbar", "controls", "place", "position", "card", "callout", "badge", "newcommand", "href", "url", "hyperlink", "textcolor", "colorbox", "footnote", "includegraphics", "frametitle", "framesubtitle", "label", "ref", "pageref", "vspace", "hspace", "tableofcontents", ...Object.keys(REVEAL_UTILITY_CONTAINERS), ...OVERLAY_COMMANDS, ...FORMATS]);
 
 export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceFiles: string[] = [ast.location.file]): SemanticResult {
   const diagnostics: import("./diagnostics.js").Diagnostic[] = [];
@@ -92,6 +92,8 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       case "fittext": case "stack": case "hstack": case "vstack": case "stretch": case "frame": return [{ type: "container", kind: REVEAL_UTILITY_CONTAINERS[node.name]!, options, children: flow(children()), source: node.location }];
       case "vspace": case "hspace": return [{ type: "container", kind: node.name, options: { ...options, size: arg() || String(options.size ?? "") }, children: [], source: node.location }];
       case "footnote": { const index = footnotes.length + 1; footnotes.push(flow(children())); return [{ type: "format", style: "footnote", children: [{ type: "text", value: String(index), source: node.location }], source: node.location }]; }
+      case "label": return [];
+      case "ref": case "pageref": return [{ type: "format", style: "ref", options: { target: arg() }, children: [{ type: "text", value: arg(), source: node.location }], source: node.location }];
       case "textcolor": return [{ type: "format", style: "textcolor", options: { color: arg() }, children: children(1), source: node.location }];
       case "colorbox": return [{ type: "format", style: "colorbox", options: { color: arg() }, children: children(1), source: node.location }];
       case "href": return [{ type: "link", href: arg(), children: children(1), source: node.location }];
@@ -220,7 +222,9 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
       interactive: options["background-interactive"] === true ? true : undefined
     };
     let subtitle: PresentationNode[] | undefined;
+    let labelValue: string | undefined;
     const contentAst = node.children.filter(child => {
+      if (child.type === "command" && child.name === "label") { labelValue = child.requiredArguments[0]?.raw.trim(); return false; }
       if (child.type === "command" && child.name === "framesubtitle") { subtitle = compile(child.requiredArguments[0]?.children ?? []); return false; }
       if (child.type === "command" && child.name === "frametitle") { title = compile(child.requiredArguments[0]?.children ?? []); return false; }
       if (child.type !== "command" || !BACKGROUND_COMMANDS.has(child.name)) return true;
@@ -237,7 +241,7 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     const body = compile(contentAst); const notes = body.filter(n => n.type === "notes").flatMap(n => n.children); const children = flow(body.filter(n => n.type !== "notes"));
     if (footnotes.length) children.push({ type: "container", kind: "footnotes", options: {}, children: footnotes.map((nodes, index) => ({ type: "paragraph", children: [{ type: "format", style: "footnote-marker", children: [{ type: "text", value: `${index + 1}`, source: node.location }], source: node.location }, ...nodes.flatMap(inner => inner.type === "paragraph" ? inner.children : [inner])], source: node.location })), source: node.location });
     padOverlaySteps(children, node.location);
-    const explicitId = stringOption(options.id) ?? stringOption(options.label);
+    const explicitId = stringOption(options.id) ?? stringOption(options.label) ?? labelValue;
     const attributes = revealAttributes(options);
     if (options.noframenumbering === true) attributes["data-visibility"] = "uncounted";
     const slide: SlideIR = { type: "slide", id: explicitId ?? stableSlideId(titleRaw, slideNumber), title, subtitle, transition: options.transition || options["transition-speed"] ? { effect: stringOption(options.transition), speed: stringOption(options["transition-speed"]) } : undefined, autoAnimate: options.autoanimate === true || options["auto-animate"] === true, center: options.center === true || options.c === true, layout: stringOption(options.layout), options, attributes, children, notes: notes.length ? notes : undefined, source: node.location };
@@ -311,6 +315,20 @@ export function analyze(ast: DocumentNode, config: RevealTeXConfig = {}, sourceF
     presentation.slides.splice(insertAt, 0, tocSlide);
     presentation.navigation.splice(insertAt, 0, tocSlide);
   }
+  const slideNumberById = new Map<string, number>(); presentation.slides.forEach((slide, index) => slideNumberById.set(slide.id, index + 1));
+  const resolveRefs = (nodes: PresentationNode[]) => {
+    for (const node of nodes) {
+      if (node.type === "format" && node.style === "ref") {
+        const target = typeof node.options?.target === "string" ? node.options.target : "";
+        const number = slideNumberById.get(target);
+        node.children = [{ type: "text", value: number !== undefined ? String(number) : target, source: node.source }];
+      } else if (node.type === "columns") node.columns.forEach(column => resolveRefs(column.children));
+      else if (node.type === "list") node.items.forEach(item => resolveRefs(item.children));
+      else if (node.type === "component") { resolveRefs(node.children); Object.values(node.slots).forEach(resolveRefs); }
+      else if ("children" in node) resolveRefs(node.children);
+    }
+  };
+  for (const slide of presentation.slides) { resolveRefs(slide.children); if (slide.title) resolveRefs(slide.title); if (slide.subtitle) resolveRefs(slide.subtitle); if (slide.notes) resolveRefs(slide.notes); }
   let transformed = presentation; for (const plugin of config.plugins ?? []) if (plugin.transformIR) transformed = plugin.transformIR(transformed);
   return { presentation: transformed, diagnostics };
 }
