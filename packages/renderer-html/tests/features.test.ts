@@ -134,6 +134,12 @@ x = 1
     expect(html).toContain('data-background-size="cover"');
   });
 
+  it("renders movies as videos with posters", async () => {
+    const html = await render(String.raw`\begin{document}\begin{frame}{M}\movie{poster.jpg}{clip.mp4}\end{frame}\end{document}`);
+    expect(html).toContain("<video ");
+    expect(html).toContain('poster="poster.jpg"');
+  });
+
   it("renders description lists", async () => {
     const html = await render(String.raw`\begin{document}\begin{frame}{D}\begin{description}\item[Term] Meaning\end{description}\end{frame}\end{document}`);
     expect(html).toContain('<dl class="rt-description">');
