@@ -122,8 +122,14 @@ export function createStudioServer(options: StudioServerOptions): StudioServer {
     return value ? String(value) : undefined;
   }
 
+  function relativize(id: string, file: string): string {
+    const dir = store.projectDir(id);
+    return file.startsWith(dir + "/") ? store.relative(id, file) : file;
+  }
+
   function toBuildResponse(build: StudioBuild): Omit<BuildEvent, "type" | "preview"> {
-    return { id: build.id, rendererName: build.rendererName, hasErrors: build.hasErrors, diagnostics: build.diagnostics, sourceFiles: build.sourceFiles };
+    const diagnostics = build.diagnostics.map(diagnostic => diagnostic.location ? { ...diagnostic, location: { ...diagnostic.location, file: relativize(build.id, diagnostic.location.file) } } : diagnostic);
+    return { id: build.id, rendererName: build.rendererName, hasErrors: build.hasErrors, diagnostics, sourceFiles: build.sourceFiles.map(file => relativize(build.id, file)) };
   }
 
   async function broadcast(id: string, build: StudioBuild): Promise<void> {

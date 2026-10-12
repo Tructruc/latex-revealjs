@@ -1,0 +1,57 @@
+* { box-sizing: border-box; }
+html, body, #app { height: 100%; margin: 0; }
+body { font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #16181d; color: #e5e7eb; font-size: 14px; }
+button, select, input { font: inherit; color: inherit; }
+button { background: #262b36; border: 1px solid #343b49; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+button:hover { background: #303643; }
+button.primary { background: #6d28d9; border-color: #7c3aed; }
+button.primary:hover { background: #7c3aed; }
+input, select { background: #1c1f26; border: 1px solid #343b49; border-radius: 6px; padding: 4px 8px; }
+
+.app { display: grid; grid-template-rows: 46px 1fr; height: 100%; min-height: 0; }
+.topbar { display: flex; align-items: center; gap: .6rem; padding: 0 .75rem; background: #1c1f26; border-bottom: 1px solid #2a2f3a; }
+.topbar .title { font-weight: 700; color: #c4b5fd; margin-right: .5rem; }
+.topbar .spacer { flex: 1; }
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; border: 1px solid #343b49; }
+.badge.ok { color: #6ee7b7; border-color: #14532d; background: #052e16; }
+.badge.bad { color: #fca5a5; border-color: #7f1d1d; background: #450a0a; }
+
+.workspace { display: grid; grid-template-columns: 260px 1fr 1fr; min-height: 0; }
+.workspace.no-preview { grid-template-columns: 260px 1fr; }
+.sidebar { background: #1a1d23; border-right: 1px solid #2a2f3a; overflow: auto; display: flex; flex-direction: column; min-width: 0; }
+.sidebar h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; margin: 12px 12px 6px; }
+.sidebar .projects { display: flex; flex-direction: column; gap: 2px; padding: 0 8px; }
+.sidebar .projects button { text-align: left; background: transparent; border: 1px solid transparent; }
+.sidebar .projects button.active { background: #262b36; border-color: #343b49; }
+.sidebar .actions { display: flex; gap: 6px; padding: 8px; }
+
+.tree { padding: 0 6px 12px; font-size: 13px; }
+.tree .row { display: flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 5px; cursor: pointer; white-space: nowrap; }
+.tree .row:hover { background: #232833; }
+.tree .row.active { background: #312e81; }
+.tree .row.dir { color: #94a3b8; cursor: default; }
+.tree .row .icon { opacity: .7; width: 14px; text-align: center; }
+
+.editor { display: flex; flex-direction: column; min-width: 0; border-right: 1px solid #2a2f3a; background: #16181d; }
+.tabs { display: flex; align-items: center; background: #1c1f26; border-bottom: 1px solid #2a2f3a; overflow-x: auto; min-height: 34px; }
+.tabs .tab { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-right: 1px solid #2a2f3a; cursor: pointer; white-space: nowrap; color: #cbd5e1; }
+.tabs .tab.active { background: #16181d; color: #fff; }
+.tabs .tab .dot { width: 6px; height: 6px; border-radius: 50%; background: #fbbf24; }
+.editor-host { flex: 1; min-height: 0; overflow: hidden; }
+.editor-host .cm-editor { height: 100%; }
+
+.preview { display: flex; flex-direction: column; min-width: 0; background: #0f1115; }
+.preview .head { display: flex; align-items: center; gap: .5rem; padding: 6px 10px; border-bottom: 1px solid #2a2f3a; background: #1c1f26; }
+.preview iframe { flex: 1; border: 0; background: #fff; }
+.placeholder { flex: 1; display: grid; place-content: center; color: #64748b; padding: 2rem; text-align: center; }
+
+.problems { border-top: 1px solid #2a2f3a; background: #1a1d23; max-height: 30%; overflow: auto; }
+.problems .diagnostic { display: grid; grid-template-columns: 90px 70px 1fr; gap: 8px; padding: 6px 12px; border-bottom: 1px solid #232833; cursor: pointer; }
+.problems .diagnostic:hover { background: #232833; }
+.problems .diagnostic .sev { font-weight: 700; }
+.problems .diagnostic.error .sev { color: #f87171; }
+.problems .diagnostic.warning .sev { color: #fbbf24; }
+.problems .diagnostic .loc { color: #94a3b8; overflow: hidden; text-overflow: ellipsis; }
+
+.statusbar { display: flex; gap: 1rem; align-items: center; padding: 3px 12px; font-size: 12px; color: #94a3b8; background: #1c1f26; border-top: 1px solid #2a2f3a; }
+.error-toast { position: fixed; bottom: 16px; right: 16px; background: #7f1d1d; color: #fff; padding: 10px 14px; border-radius: 8px; max-width: 420px; }

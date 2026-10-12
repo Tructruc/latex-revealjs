@@ -8,3 +8,5 @@ dist-html/
 .tmp-cli-debug/
 .opencode/
 coverage/
+.studio-projects/
+apps/studio-web/dist/

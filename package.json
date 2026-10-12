@@ -2,11 +2,15 @@
   "name": "revealtex-workspace",
   "private": true,
   "type": "module",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "build": "tsc -b",
     "test": "npm run build && vitest run",
-    "typecheck": "tsc -b --pretty false"
+    "typecheck": "tsc -b --pretty false",
+    "build:web": "npm run build --workspace @revealtex/studio-web"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
