@@ -6,6 +6,7 @@
     { "path": "packages/renderer-vue" },
     { "path": "packages/renderer-html" },
     { "path": "packages/core" },
+    { "path": "packages/studio" },
     { "path": "packages/cli" }
   ]
 }

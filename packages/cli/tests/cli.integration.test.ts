@@ -253,6 +253,25 @@ describe.sequential("RevealTeX CLI integration", () => {
     expect(source).toContain("\\Metric[value=94.7");
   }, 20_000);
 
+  it("starts the studio server", async () => {
+    const root = await mkdtemp(join(tmpdir(), "revealtex-studio-cli-"));
+    temporaryDirectories.add(root);
+    const child = spawn(process.execPath, [cliEntry, "studio", "--projects", join(root, "projects"), "--port", "0"], { cwd: root, env: { ...process.env, NO_COLOR: "1" }, stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "";
+    let stderr = "";
+    child.stdout?.on("data", chunk => { stdout += String(chunk); });
+    child.stderr?.on("data", chunk => { stderr += String(chunk); });
+    try {
+      await waitUntil(() => /http:\/\/127\.0\.0\.1:\d+/.test(stdout), `studio URL (stdout: ${stdout} stderr: ${stderr})`);
+      const url = stdout.match(/http:\/\/127\.0\.0\.1:\d+/)![0];
+      const health = await fetch(`${url}/api/health`);
+      expect(health.status).toBe(200);
+      expect(await health.json()).toEqual({ ok: true });
+    } finally {
+      child.kill("SIGKILL");
+    }
+  }, 20_000);
+
   it("prints its version", async () => {
     const result = await runCli(["--version"]);
     expect(result.stdout).toMatch(/revealtex \d+\.\d+\.\d+/);

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { formatDiagnostic } from "@revealtex/compiler";
 import {
   commitGeneratedOutput,
@@ -15,6 +16,7 @@ import {
 } from "@revealtex/core";
 import { createServer } from "vite";
 import vue from "@vitejs/plugin-vue";
+import { createStudioServer } from "@revealtex/studio";
 
 interface BuildSnapshot { watchTargets: WatchTarget[] }
 
@@ -31,6 +33,10 @@ async function main(): Promise<void> {
     const target = resolve(sourceArg ?? ".");
     await initProject(target);
     process.stdout.write(`RevealTeX: created a starter project in ${target}.\n`);
+    return;
+  }
+  if (command === "studio") {
+    await startStudio(flags);
     return;
   }
   if (command === "help" || command === "--help" || !sourceArg) { usage(); return; }
@@ -138,6 +144,21 @@ defineProps<{ value: number; label: string }>();
   }
 }
 
+async function startStudio(flags: Record<string, string | boolean>): Promise<void> {
+  const projectsRoot = resolve(String(flags.projects ?? ".studio-projects"));
+  const port = flags.port !== undefined ? Number(flags.port) : 4400;
+  if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error(`Invalid studio port "${String(flags.port)}".`);
+  const host = flags.host !== undefined ? String(flags.host) : "127.0.0.1";
+  const studioWebDir = flags.web !== undefined ? resolve(String(flags.web)) : fileURLToPath(new URL("../../../apps/studio-web/dist/", import.meta.url));
+  const templatesDirectory = flags.templates !== undefined ? resolve(String(flags.templates)) : undefined;
+  const server = createStudioServer({ projectsRoot, host, port, studioWebDir, templatesDirectory });
+  const { url } = await server.listen();
+  process.stdout.write(`RevealTeX Studio running at ${url}\nProjects directory: ${projectsRoot}\nPress Ctrl+C to stop.\n`);
+  const close = async () => { await server.close(); process.exit(0); };
+  process.once("SIGINT", () => void close());
+  process.once("SIGTERM", () => void close());
+}
+
 async function startDevServer(output: string, options: Record<string, string | boolean>): Promise<void> {
   const port = typeof options.port === "string" ? Number(options.port) : 5173;
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error(`Invalid dev server port "${String(options.port)}".`);
@@ -179,6 +200,7 @@ function usage(): void {
     "",
     "Commands:",
     "  init      Create a starter project in a directory",
+    "  studio    Start the browser-based studio (Overleaf-style editor)",
     "  dev       Compile, watch, and serve with Vite",
     "  watch     Compile and rebuild on changes",
     "  build     Compile once",
@@ -192,6 +214,9 @@ function usage(): void {
     "  --standalone           Emit standalone Vite project files",
     "  --host <host>          Dev server host (dev)",
     "  --port <port>          Dev server port (dev)",
+    "  --projects <dir>       Projects directory (studio, default .studio-projects)",
+    "  --templates <dir>      Extra templates directory (studio)",
+    "  --web <dir>            Studio web build directory (studio)",
     "  --version              Print the version",
     ""
   ].join("\n"));

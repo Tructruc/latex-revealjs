@@ -1,0 +1,10 @@
+export { createStudioServer } from "./server.js";
+export type { StudioServer, StudioServerOptions, BuildEvent } from "./server.js";
+export { ProjectStore, StudioError } from "./projects.js";
+export type { ProjectSummary, FileNode, ProjectStoreOptions } from "./projects.js";
+export { PreviewManager } from "./preview.js";
+export type { PreviewInfo } from "./preview.js";
+export { buildProject } from "./build.js";
+export type { StudioBuild } from "./build.js";
+export { BUILTIN_TEMPLATES } from "./templates.js";
+export type { ProjectTemplate } from "./templates.js";
