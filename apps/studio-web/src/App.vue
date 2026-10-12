@@ -11,6 +11,11 @@ const editorRef = ref<InstanceType<typeof CodeEditor>>();
 const newName = ref("");
 const newTemplate = ref("blank");
 const showPreview = ref(true);
+const rendererChoice = ref("auto");
+
+function changeRenderer(): void {
+  void studio.setRenderer(rendererChoice.value === "auto" ? "" : rendererChoice.value);
+}
 
 onMounted(() => studio.init());
 
@@ -58,12 +63,32 @@ function onUpload(event: Event): void {
       </select>
       <button class="primary" @click="createProject">New</button>
       <span class="spacer" />
+      <label class="badge">Renderer
+        <select v-model="rendererChoice" @change="changeRenderer" style="margin-left: 6px">
+          <option value="auto">auto</option>
+          <option value="vue">vue</option>
+          <option value="html">html</option>
+        </select>
+      </label>
       <button @click="showPreview = !showPreview">{{ showPreview ? "Hide preview" : "Show preview" }}</button>
       <span class="badge" :class="studio.hasErrors ? 'bad' : 'ok'">{{ statusLabel }}</span>
     </header>
 
     <div class="workspace" :class="{ 'no-preview': !showPreview }">
       <aside class="sidebar">
+        <h3>Projects</h3>
+        <div class="projects">
+          <button
+            v-for="project in studio.projects"
+            :key="project.id"
+            :class="{ active: project.id === studio.activeId }"
+            @click="studio.selectProject(project.id)"
+          >
+            {{ project.name }}
+            <span style="float: right; opacity: .6" @click.stop="studio.deleteProject(project.id)">×</span>
+          </button>
+          <p v-if="!studio.projects.length" style="padding: 0 8px; color: #64748b;">No projects yet.</p>
+        </div>
         <div class="actions">
           <button @click="newFile" :disabled="!studio.activeId">New file</button>
           <label class="badge" style="cursor: pointer; display: inline-flex; align-items: center;">

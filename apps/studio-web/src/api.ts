@@ -27,5 +27,5 @@ export const api = {
   async uploadBinary(id: string, path: string, dataUrl: string): Promise<void> { await request(`/api/projects/${encodeURIComponent(id)}/binary`, { method: "POST", ...json({ path, data: dataUrl }) }); },
   async renameFile(id: string, from: string, to: string): Promise<void> { await request(`/api/projects/${encodeURIComponent(id)}/file`, { method: "PATCH", ...json({ from, to }) }); },
   async deleteFile(id: string, path: string): Promise<void> { await request(`/api/projects/${encodeURIComponent(id)}/file?path=${encodeURIComponent(path)}`, { method: "DELETE" }); },
-  async preview(id: string): Promise<BuildResponse> { return (await request(`/api/projects/${encodeURIComponent(id)}/preview`, { method: "POST", ...json({}) })).json(); }
+  async preview(id: string, renderer?: string): Promise<BuildResponse> { return (await request(`/api/projects/${encodeURIComponent(id)}/preview`, { method: "POST", ...json({ renderer }) })).json(); }
 };

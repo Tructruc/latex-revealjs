@@ -142,6 +142,22 @@ describe("studio server", () => {
     expect(rebuild.preview?.kind).toBe("vue");
   }, 20_000);
 
+  it("honours a renderer override over WebSocket", async () => {
+    const { base, ws } = await start();
+    await createProject(base);
+    const socket = new WebSocket(`${ws}/api/events?project=talk&renderer=html`);
+    sockets.push(socket);
+    await new Promise<void>((resolveOpen, rejectOpen) => { socket.once("open", () => resolveOpen()); socket.once("error", rejectOpen); });
+    const initial = await nextBuild(socket);
+    expect(initial.rendererName).toBe("html");
+
+    const pending = nextBuild(socket);
+    await writeFile(base, "talk", "presentation.rtex", String.raw`\begin{document}\begin{frame}{Changed}Updated\end{frame}\end{document}`);
+    const rebuild = await pending;
+    expect(rebuild.rendererName).toBe("html");
+    expect(rebuild.preview?.kind).toBe("html");
+  }, 20_000);
+
   it("returns 404 for a missing project", async () => {
     const { base } = await start();
     expect((await fetch(`${base}/api/projects/missing/compile`)).status).toBe(404);

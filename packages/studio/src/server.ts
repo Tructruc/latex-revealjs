@@ -38,7 +38,7 @@ export interface StudioServer {
   close(): Promise<void>;
 }
 
-interface WatchState { watcher: FSWatcher; clients: Set<WebSocket>; timer?: ReturnType<typeof setTimeout>; building: boolean; queued: boolean }
+interface WatchState { watcher: FSWatcher; clients: Set<WebSocket>; timer?: ReturnType<typeof setTimeout>; building: boolean; queued: boolean; renderer?: string }
 
 export function createStudioServer(options: StudioServerOptions): StudioServer {
   const store = new ProjectStore({ root: options.projectsRoot, templatesDirectory: options.templatesDirectory });
@@ -146,12 +146,12 @@ export function createStudioServer(options: StudioServerOptions): StudioServer {
     if (!state) return;
     if (state.building) { state.queued = true; return; }
     state.building = true;
-    try { await broadcast(id, await buildProject(store, id)); }
+    try { await broadcast(id, await buildProject(store, id, state.renderer)); }
     catch { /* diagnostics surface on the next successful build */ }
     finally { state.building = false; if (state.queued) { state.queued = false; void rebuild(id); } }
   }
 
-  async function subscribe(id: string, client: WebSocket): Promise<void> {
+  async function subscribe(id: string, client: WebSocket, renderer?: string): Promise<void> {
     if (!(await store.exists(id))) { client.close(4404, "Project not found."); return; }
     let state = watchers.get(id);
     if (!state) {
@@ -162,9 +162,10 @@ export function createStudioServer(options: StudioServerOptions): StudioServer {
       watchers.set(id, created);
       state = created;
     }
+    state.renderer = renderer;
     state.clients.add(client);
     client.on("close", () => { void unsubscribe(id, client); });
-    try { client.send(JSON.stringify({ type: "build", ...toBuildResponse(await buildProject(store, id)) } satisfies BuildEvent)); } catch { /* ignore */ }
+    try { client.send(JSON.stringify({ type: "build", ...toBuildResponse(await buildProject(store, id, renderer)) } satisfies BuildEvent)); } catch { /* ignore */ }
   }
 
   async function unsubscribe(id: string, client: WebSocket): Promise<void> {
@@ -194,7 +195,8 @@ export function createStudioServer(options: StudioServerOptions): StudioServer {
         const url = new URL(request.url ?? "/", "http://localhost");
         if (url.pathname !== "/api/events") { socket.destroy(); return; }
         const id = url.searchParams.get("project") ?? "";
-        wss.handleUpgrade(request, socket, head, client => void subscribe(id, client));
+        const renderer = url.searchParams.get("renderer") ?? undefined;
+        wss.handleUpgrade(request, socket, head, client => void subscribe(id, client, renderer));
       });
       const port = options.port ?? 4400;
       await new Promise<void>((resolveListen, rejectListen) => {

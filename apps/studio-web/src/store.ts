@@ -16,6 +16,7 @@ export const useStudio = defineStore("studio", {
     diagnostics: [] as Diagnostic[],
     hasErrors: false,
     rendererName: "vue",
+    rendererOverride: "" as string,
     previewUrl: "",
     previewKind: "",
     revision: 0,
@@ -119,13 +120,20 @@ export const useStudio = defineStore("studio", {
     },
     async refreshPreview() {
       if (!this.activeId) return;
-      try { this.applyBuild(await api.preview(this.activeId)); }
+      try { this.applyBuild(await api.preview(this.activeId, this.rendererOverride || undefined)); }
       catch (error) { this.fail(error); }
+    },
+    async setRenderer(renderer: string) {
+      this.rendererOverride = renderer;
+      this.previewUrl = "";
+      this.connect();
+      await this.refreshPreview();
     },
     connect() {
       this.socket?.close();
       const protocol = location.protocol === "https:" ? "wss" : "ws";
-      const socket = new WebSocket(`${protocol}://${location.host}/api/events?project=${encodeURIComponent(this.activeId)}`);
+      const renderer = this.rendererOverride ? `&renderer=${encodeURIComponent(this.rendererOverride)}` : "";
+      const socket = new WebSocket(`${protocol}://${location.host}/api/events?project=${encodeURIComponent(this.activeId)}${renderer}`);
       socket.onopen = () => { this.status = "connected"; };
       socket.onmessage = event => { try { this.applyBuild(JSON.parse(event.data) as BuildResponse); } catch { /* ignore */ } };
       socket.onclose = () => { if (this.status !== "error") this.status = "idle"; };
