@@ -71,6 +71,10 @@ export function createStudioServer(options: StudioServerOptions): StudioServer {
     await store.remove(req.params.id);
     res.json({ ok: true });
   }));
+  app.post("/api/projects/:id/template", asyncHandler(async (req, res) => {
+    const name = await store.saveTemplate(req.params.id, String(req.body?.name ?? req.params.id));
+    res.status(201).json({ name });
+  }));
   app.get("/api/projects/:id/tree", asyncHandler(async (req, res) => { res.json(await store.tree(req.params.id)); }));
   app.get("/api/projects/:id/file", asyncHandler(async (req, res) => {
     res.type("text/plain").send(await store.read(req.params.id, String(req.query.path ?? "")));

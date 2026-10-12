@@ -111,6 +111,10 @@ export const useStudio = defineStore("studio", {
       if (this.activePath === from) this.activePath = to;
       await this.refreshTree();
     },
+    async saveAsTemplate(name: string) {
+      await api.saveTemplate(this.activeId, name);
+      this.templates = await api.templates();
+    },
     async uploadFiles(files: FileList) {
       for (const file of Array.from(files)) {
         const data = await readAsBase64(file);

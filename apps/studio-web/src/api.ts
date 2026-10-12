@@ -20,6 +20,7 @@ export const api = {
   async templates(): Promise<TemplateSummary[]> { return (await request("/api/templates")).json(); },
   async createProject(name: string, template: string): Promise<ProjectSummary> { return (await request("/api/projects", { method: "POST", ...json({ name, template }) })).json(); },
   async deleteProject(id: string): Promise<void> { await request(`/api/projects/${encodeURIComponent(id)}`, { method: "DELETE" }); },
+  async saveTemplate(id: string, name: string): Promise<void> { await request(`/api/projects/${encodeURIComponent(id)}/template`, { method: "POST", ...json({ name }) }); },
   async tree(id: string): Promise<FileNode[]> { return (await request(`/api/projects/${encodeURIComponent(id)}/tree`)).json(); },
   async readFile(id: string, path: string): Promise<string> { return (await request(`/api/projects/${encodeURIComponent(id)}/file?path=${encodeURIComponent(path)}`)).text(); },
   async writeFile(id: string, path: string, content: string): Promise<void> { await request(`/api/projects/${encodeURIComponent(id)}/file`, { method: "PUT", ...json({ path, content }) }); },

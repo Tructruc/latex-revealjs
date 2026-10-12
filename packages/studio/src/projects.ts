@@ -144,6 +144,21 @@ export class ProjectStore {
     await rename(source, target);
   }
 
+  /** Copy a project's files into the configured user templates directory. */
+  async saveTemplate(id: string, name: string): Promise<string> {
+    if (!this.templatesDirectory) throw new StudioError(400, "No templates directory is configured (use --templates).");
+    const templateName = slugify(name);
+    if (!templateName) throw new StudioError(400, "Template name must contain at least one letter or digit.");
+    const target = join(this.templatesDirectory, templateName);
+    const files = await readDirectoryFiles(this.projectDir(id));
+    for (const [path, content] of Object.entries(files)) {
+      const file = join(target, path);
+      await mkdir(dirname(file), { recursive: true });
+      await writeFile(file, content);
+    }
+    return templateName;
+  }
+
   async mainFilePath(id: string): Promise<string> {
     const dir = this.projectDir(id);
     try { await stat(dir); } catch { throw new StudioError(404, `Project "${id}" not found.`); }

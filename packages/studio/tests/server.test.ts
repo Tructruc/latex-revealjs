@@ -158,6 +158,20 @@ describe("studio server", () => {
     expect(rebuild.preview?.kind).toBe("html");
   }, 20_000);
 
+  it("saves a project as a user template", async () => {
+    const root = await mkdtemp(join(tmpdir(), "revealtex-studio-tpl-"));
+    roots.add(root);
+    const server = createStudioServer({ projectsRoot: join(root, "projects"), templatesDirectory: join(root, "templates"), port: 0 });
+    const { url } = await server.listen();
+    servers.push(server);
+    const base = url.replace(/\/$/, "");
+    await createProject(base, "talk");
+    const response = await fetch(`${base}/api/projects/talk/template`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "My Template" }) });
+    expect(response.status).toBe(201);
+    const templates = await (await fetch(`${base}/api/templates`)).json() as Array<{ name: string }>;
+    expect(templates.map(template => template.name)).toContain("my-template");
+  });
+
   it("returns 404 for a missing project", async () => {
     const { base } = await start();
     expect((await fetch(`${base}/api/projects/missing/compile`)).status).toBe(404);

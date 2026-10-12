@@ -32,6 +32,13 @@ async function createProject(): Promise<void> {
   newName.value = "";
 }
 
+async function saveAsTemplate(): Promise<void> {
+  const name = window.prompt("Template name", studio.activeId);
+  if (!name) return;
+  try { await studio.saveAsTemplate(name); }
+  catch (error) { studio.fail(error); }
+}
+
 async function newFile(): Promise<void> {
   const path = window.prompt("New file path (e.g. slides/intro.rtex)");
   if (path) await studio.createFile(path);
@@ -62,6 +69,7 @@ function onUpload(event: Event): void {
         <option v-for="template in studio.templates" :key="template.name" :value="template.name">{{ template.label }}</option>
       </select>
       <button class="primary" @click="createProject">New</button>
+      <button :disabled="!studio.activeId" @click="saveAsTemplate">Save as template</button>
       <span class="spacer" />
       <label class="badge">Renderer
         <select v-model="rendererChoice" @change="changeRenderer" style="margin-left: 6px">
