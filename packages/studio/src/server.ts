@@ -1,4 +1,5 @@
 import { createServer as createHttpServer, type Server as HttpServer } from "node:http";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { COMMAND_COMPLETIONS, ENVIRONMENT_COMPLETIONS, type Diagnostic } from "@revealtex/compiler";
@@ -111,10 +112,15 @@ export function createStudioServer(options: StudioServerOptions): StudioServer {
 
   app.use("/preview-files", express.static(workspace, { fallthrough: true }));
 
-  if (options.studioWebDir) {
-    const indexHtml = join(options.studioWebDir, "index.html");
-    app.use(express.static(options.studioWebDir, { fallthrough: true }));
-    app.get(/^(?!\/api\/).*/, asyncHandler(async (_req, res) => { res.type("html").send(await readFile(indexHtml, "utf8")); }));
+  const webIndex = options.studioWebDir ? join(options.studioWebDir, "index.html") : undefined;
+  const hasWeb = Boolean(webIndex && existsSync(webIndex!));
+  if (hasWeb) {
+    app.use(express.static(options.studioWebDir!, { fallthrough: true }));
+    app.get(/^(?!\/api\/).*/, asyncHandler(async (_req, res) => { res.type("html").send(await readFile(webIndex!, "utf8")); }));
+  } else {
+    app.get(/^(?!\/api\/).*/, (_req, res) => {
+      res.status(200).type("html").send(`<!doctype html><meta charset="utf-8"><title>RevealTeX Studio</title><body style="font-family:system-ui;background:#0f1115;color:#e6e8ee;display:grid;place-content:center;height:100vh;margin:0;text-align:center"><div><h1>RevealTeX Studio</h1><p>The studio API is running, but the web app build was not found.</p><p>Build it with <code style="color:#c4b5fd">npm run build:web</code>, then pass its directory with <code style="color:#c4b5fd">--web apps/studio-web/dist</code>.</p></div></body>`);
+    });
   }
 
   app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {

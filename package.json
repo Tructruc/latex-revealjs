@@ -10,7 +10,8 @@
     "build": "tsc -b",
     "test": "npm run build && vitest run",
     "typecheck": "tsc -b --pretty false",
-    "build:web": "npm run build --workspace @revealtex/studio-web"
+    "build:web": "npm run build --workspace @revealtex/studio-web",
+    "studio": "node packages/cli/dist/cli.js studio --web apps/studio-web/dist"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
