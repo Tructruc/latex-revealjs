@@ -5,6 +5,7 @@
     { "path": "packages/renderer-core" },
     { "path": "packages/renderer-vue" },
     { "path": "packages/renderer-html" },
+    { "path": "packages/core" },
     { "path": "packages/cli" }
   ]
 }

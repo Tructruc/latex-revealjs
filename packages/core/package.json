@@ -1,0 +1,16 @@
+{
+  "name": "@revealtex/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "dependencies": {
+    "@revealtex/compiler": "*",
+    "@revealtex/renderer-core": "*",
+    "@revealtex/renderer-vue": "*",
+    "@revealtex/renderer-html": "*",
+    "typescript": "^5.7.0"
+  },
+  "scripts": { "build": "tsc -b" }
+}

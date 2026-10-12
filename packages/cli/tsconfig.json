@@ -1,4 +1,4 @@
 {
   "extends": "../../tsconfig.base.json", "compilerOptions": { "rootDir": "src", "outDir": "dist" }, "include": ["src/**/*.ts"],
-  "references": [{ "path": "../compiler" }, { "path": "../renderer-core" }, { "path": "../renderer-vue" }, { "path": "../renderer-html" }]
+  "references": [{ "path": "../compiler" }, { "path": "../renderer-core" }, { "path": "../renderer-vue" }, { "path": "../renderer-html" }, { "path": "../core" }]
 }
