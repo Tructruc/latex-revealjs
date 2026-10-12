@@ -1,19 +1,28 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps<{ url: string; kind: string; revision: number }>();
-const src = computed(() => props.url ? (props.kind === "html" ? `${props.url}${props.url.includes("#") ? "" : `#${props.revision}`}` : props.url) : "");
+const manual = ref(0);
+const src = computed(() => {
+  if (!props.url) return "";
+  const separator = props.url.includes("?") ? "&" : "?";
+  return `${props.url}${separator}rt=${props.revision}-${manual.value}`;
+});
 </script>
 
 <template>
   <div class="preview">
-    <div class="head">
-      <strong>Preview</strong>
-      <span class="badge">{{ kind || "—" }}</span>
-      <span class="spacer" style="flex: 1" />
-      <a :href="url" target="_blank" rel="noopener" style="color: #c4b5fd" v-if="url">Open in new tab</a>
+    <div class="panel-head">
+      <span class="panel-title">Preview</span>
+      <span class="pill">{{ kind || "—" }}</span>
+      <span class="grow" />
+      <button class="ghost" title="Reload" @click="manual++">Reload</button>
+      <a v-if="url" class="ghost" :href="url" target="_blank" rel="noopener">Open</a>
     </div>
     <iframe v-if="src" :src="src" title="Preview" />
-    <div v-else class="placeholder">Select a project to start a live preview.</div>
+    <div v-else class="placeholder">
+      <p>No live preview yet.</p>
+      <p>Select a project to start one.</p>
+    </div>
   </div>
 </template>

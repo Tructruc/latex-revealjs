@@ -1,4 +1,3 @@
-import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import { commitGeneratedOutput, standaloneFiles } from "@revealtex/core";
 import { createServer, type ViteDevServer } from "vite";
@@ -28,7 +27,8 @@ export class PreviewManager {
   }
 
   private async writeOutput(build: StudioBuild, dir: string, standalone: boolean): Promise<void> {
-    await rm(dir, { recursive: true, force: true });
+    // Write in place (no directory removal) so the embedded Vite dev server
+    // keeps watching the root and picks up the new files.
     const files = [...build.files];
     if (standalone) files.push(...standaloneFiles(build.config));
     await commitGeneratedOutput(dir, files);

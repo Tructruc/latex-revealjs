@@ -3,6 +3,9 @@ export interface FileNode { name: string; path: string; type: "file" | "director
 export interface TemplateSummary { name: string; label: string; description?: string }
 export interface Diagnostic { severity: "error" | "warning" | "info"; code: string; message: string; hint?: string; location?: { file: string; start: { line: number; column: number } } }
 export interface BuildResponse { id: string; rendererName: string; hasErrors: boolean; diagnostics: Diagnostic[]; sourceFiles: string[]; preview?: { kind: string; url: string } }
+export interface CommandCompletion { name: string; detail: string; snippet?: string }
+export interface EnvironmentCompletion { name: string; detail: string; argument?: string }
+export interface CompletionData { commands: CommandCompletion[]; environments: EnvironmentCompletion[] }
 
 async function request(path: string, options?: RequestInit): Promise<Response> {
   const response = await fetch(path, options);
@@ -18,6 +21,7 @@ const json = (body: unknown): RequestInit => ({ headers: { "content-type": "appl
 export const api = {
   async listProjects(): Promise<ProjectSummary[]> { return (await request("/api/projects")).json(); },
   async templates(): Promise<TemplateSummary[]> { return (await request("/api/templates")).json(); },
+  async completions(): Promise<CompletionData> { return (await request("/api/completions")).json(); },
   async createProject(name: string, template: string): Promise<ProjectSummary> { return (await request("/api/projects", { method: "POST", ...json({ name, template }) })).json(); },
   async deleteProject(id: string): Promise<void> { await request(`/api/projects/${encodeURIComponent(id)}`, { method: "DELETE" }); },
   async saveTemplate(id: string, name: string): Promise<void> { await request(`/api/projects/${encodeURIComponent(id)}/template`, { method: "POST", ...json({ name }) }); },

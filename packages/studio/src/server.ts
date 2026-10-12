@@ -1,7 +1,7 @@
 import { createServer as createHttpServer, type Server as HttpServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Diagnostic } from "@revealtex/compiler";
+import { COMMAND_COMPLETIONS, ENVIRONMENT_COMPLETIONS, type Diagnostic } from "@revealtex/compiler";
 import chokidar, { type FSWatcher } from "chokidar";
 import express, { type NextFunction, type Request, type Response } from "express";
 import { WebSocketServer, type WebSocket } from "ws";
@@ -52,6 +52,7 @@ export function createStudioServer(options: StudioServerOptions): StudioServer {
   app.use(express.json({ limit: "32mb" }));
 
   app.get("/api/health", (_req, res) => { res.json({ ok: true }); });
+  app.get("/api/completions", (_req, res) => { res.json({ commands: COMMAND_COMPLETIONS, environments: ENVIRONMENT_COMPLETIONS }); });
   app.get("/api/templates", asyncHandler(async (_req, res) => {
     const templates = await store.templates();
     res.json(templates.map(template => ({ name: template.name, label: template.label, description: template.description })));
@@ -160,7 +161,7 @@ export function createStudioServer(options: StudioServerOptions): StudioServer {
     let state = watchers.get(id);
     if (!state) {
       const dir = store.projectDir(id);
-      const watcher = chokidar.watch(dir, { ignoreInitial: true, ignored: [/[/\\]\.studio([/\\]|$)/, "**/node_modules/**", "**/.git/**", "**/generated/**"] });
+      const watcher = chokidar.watch(dir, { ignoreInitial: true, ignored: (path: string) => /(^|[/\\])(node_modules|\.git|\.studio|generated|dist)([/\\]|$)/.test(path) });
       const created: WatchState = { watcher, clients: new Set(), building: false, queued: false };
       watcher.on("all", () => { clearTimeout(created.timer); created.timer = setTimeout(() => void rebuild(id), 120); });
       watchers.set(id, created);

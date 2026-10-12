@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { api, type BuildResponse, type Diagnostic, type FileNode, type ProjectSummary, type TemplateSummary } from "./api";
+import { api, type BuildResponse, type CompletionData, type Diagnostic, type FileNode, type ProjectSummary, type TemplateSummary } from "./api";
 
 export interface OpenFile { path: string; content: string; saved: string; dirty: boolean }
 
@@ -9,6 +9,7 @@ export const useStudio = defineStore("studio", {
   state: () => ({
     projects: [] as ProjectSummary[],
     templates: [] as TemplateSummary[],
+    completions: { commands: [], environments: [] } as CompletionData,
     activeId: "",
     tree: [] as FileNode[],
     openFiles: [] as OpenFile[],
@@ -30,8 +31,12 @@ export const useStudio = defineStore("studio", {
   },
   actions: {
     async init() {
-      try { this.templates = await api.templates(); await this.loadProjects(); }
-      catch (error) { this.fail(error); }
+      try {
+        const [templates, completions] = await Promise.all([api.templates(), api.completions()]);
+        this.templates = templates;
+        this.completions = completions;
+        await this.loadProjects();
+      } catch (error) { this.fail(error); }
     },
     async loadProjects() {
       this.projects = await api.listProjects();

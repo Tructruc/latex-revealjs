@@ -172,6 +172,30 @@ describe("studio server", () => {
     expect(templates.map(template => template.name)).toContain("my-template");
   });
 
+  it("exposes editor completions", async () => {
+    const { base } = await start();
+    const data = await (await fetch(`${base}/api/completions`)).json() as { commands: Array<{ name: string }>; environments: Array<{ name: string }> };
+    expect(data.commands.map(item => item.name)).toEqual(expect.arrayContaining(["fragment", "image", "note"]));
+    expect(data.environments.map(item => item.name)).toEqual(expect.arrayContaining(["frame", "columns", "itemize"]));
+  });
+
+  it("refreshes the HTML preview after an edit", async () => {
+    const { base, ws } = await start();
+    await createProject(base);
+    await writeFile(base, "talk", "revealtex.config.ts", `export default { renderer: "html" };\n`);
+    const socket = new WebSocket(`${ws}/api/events?project=talk&renderer=html`);
+    sockets.push(socket);
+    await new Promise<void>((resolveOpen, rejectOpen) => { socket.once("open", () => resolveOpen()); socket.once("error", rejectOpen); });
+    await nextBuild(socket);
+
+    const pending = nextBuild(socket);
+    await writeFile(base, "talk", "presentation.rtex", String.raw`\begin{document}\begin{frame}{Alpha}One\end{frame}\end{document}`);
+    const rebuild = await pending;
+    expect(rebuild.preview?.kind).toBe("html");
+    const html = await (await fetch(`${base}${rebuild.preview!.url}`)).text();
+    expect(html).toContain("Alpha");
+  }, 20_000);
+
   it("returns 404 for a missing project", async () => {
     const { base } = await start();
     expect((await fetch(`${base}/api/projects/missing/compile`)).status).toBe(404);

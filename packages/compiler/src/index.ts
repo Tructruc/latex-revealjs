@@ -1,5 +1,6 @@
 export * from "./ast.js";
 export * from "./attributes.js";
+export * from "./completions.js";
 export * from "./config.js";
 export * from "./diagnostics.js";
 export * from "./ir.js";
