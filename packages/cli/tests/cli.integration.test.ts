@@ -267,10 +267,19 @@ describe.sequential("RevealTeX CLI integration", () => {
       const health = await fetch(`${url}/api/health`);
       expect(health.status).toBe(200);
       expect(await health.json()).toEqual({ ok: true });
+
+      const created = await fetch(`${url}/api/projects`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "demo", template: "blank" }) });
+      expect(created.status).toBe(201);
+      await fetch(`${url}/api/projects/demo/file`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ path: "revealtex.config.ts", content: "export default {};\n" }) });
+      const preview = await (await fetch(`${url}/api/projects/demo/preview`, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).json() as { preview?: { kind: string; url: string } };
+      expect(preview.preview?.kind).toBe("vue");
+      const page = await fetch(preview.preview!.url);
+      expect(page.status).toBe(200);
+      expect(await page.text()).toContain('<div id="app">');
     } finally {
       child.kill("SIGKILL");
     }
-  }, 20_000);
+  }, 30_000);
 
   it("prints its version", async () => {
     const result = await runCli(["--version"]);

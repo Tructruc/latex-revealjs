@@ -17,6 +17,18 @@ node packages/cli/dist/cli.js dev my-talk/presentation.rtex \
 
 `init` writes a starter `presentation.rtex`, `revealtex.config.ts`, and sample component. Open the printed localhost URL. `dev` launches Vite, watches the complete `.rtex` include graph and configuration, and sends generated Vue updates through HMR. For an existing Vue application, use `revealtex build presentation.rtex --output src/generated`, or `watch` to rebuild without starting another server. A full showcase lives in [`examples/showcase`](./examples/showcase).
 
+## Studio (browser editor)
+
+`revealtex studio` starts a local, Overleaf-style web app for multi-file projects: a project list, file tree, a CodeMirror editor with `.rtex` highlighting, a problems panel with click-to-line diagnostics, and a live preview. Previews are pluggable — the Vue renderer runs an embedded Vite dev server with HMR, the HTML renderer serves static files; future renderers add their own preview provider.
+
+```bash
+node packages/cli/dist/cli.js studio \
+  --projects .studio-projects \
+  --web apps/studio-web/dist
+```
+
+Options: `--projects <dir>` (default `.studio-projects`), `--templates <dir>` (extra templates), `--web <dir>` (built SPA), `--host`, `--port` (default `4400`). Projects created from the built-in `blank`/`minimal` templates; drop folders into the templates directory to add more. The server exposes a JSON API (`/api/projects`, `/api/projects/:id/file`, `/api/projects/:id/compile`, `/api/projects/:id/preview`) and a WebSocket (`/api/events?project=<id>`) that streams live build diagnostics.
+
 ## Language
 
 Frames, fragments, overlays, math, columns, media, code, notes, and renderer escape blocks follow the forms in [SPEC.md](./SPEC.md):
@@ -253,6 +265,8 @@ This makes `\score{94.7}` compile to portable `ComponentIR`. Command children ar
 - `@revealtex/renderer-vue`: readable Vue source generator (themes, code highlighting, Mermaid, charts, layouts)
 - `@revealtex/renderer-html`: standalone reveal.js HTML renderer with semantic component and layout fallbacks
 - `@revealtex/runtime-vue`: reveal lifecycle components, context composables, theme, and animations
+- `@revealtex/core`: shared compile/config/output/watch engine used by the CLI and Studio
+- `@revealtex/studio`: browser studio server (projects, compile, live previews, WebSocket)
 - `revealtex`: public configuration API and CLI
 
 Run `npm test` for parser, semantic, custom-component, Vue-generation, and HTML-backend coverage.
